@@ -1,136 +1,483 @@
 :root {
-    --primary: #0b63ff;
-    --primary-600: #0a52d6;
-    --accent: #ffb020;
-    --bg: #f6f8fb;
-    --surface: #ffffff;
-    --muted: #6b7280;
-    --text: #111827;
-    --border: #e6e9ef;
-    --danger: #e11d48;
-    --success: #10b981;
-    --radius: 8px;
-    --shadow: 0 6px 18px rgba(15,23,42,0.08);
+    --primary-color: #007bff;
+    --primary-hover: #0056b3;
+    --secondary-color: #6c757d;
+    --secondary-hover: #5a6268;
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --text-muted: #888;
+    --border-color: #333;
+    --error-color: #cf6679;
 }
 
-/* Global reset */
-* { box-sizing: border-box; }
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
+    background-color: var(--bg-color);
+    color: var(--text-color);
     line-height: 1.6;
 }
 
-a { color: var(--primary); text-decoration: none; }
-a:hover { text-decoration: underline; }
+input, button {
+    font-family: inherit;
+    font-size: 1rem;
+}
 
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+.auth-container {
+    display: flex;
     justify-content: center;
-    gap: .5rem;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--text);
-    cursor: pointer;
-    font-weight: 600;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-form {
+    background-color: var(--surface-color);
+    padding: 2.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-form h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .btn-primary {
-    background: var(--primary);
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--primary-color);
     color: white;
-    border-color: var(--primary-600);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
-.btn-primary:hover { background: var(--primary-600); }
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+    background-color: var(--secondary-color);
+    cursor: not-allowed;
+}
 
 .btn-secondary {
-    background: transparent;
-    color: var(--primary);
-    border-color: var(--border);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
+
 .btn-secondary:hover {
-    background: rgba(11,99,255,0.08);
+    background-color: var(--primary-color);
+    color: white;
 }
 
-.btn-danger { background: var(--danger); color: white; border-color: rgba(225,29,72,0.9); }
-.btn-small { padding: 0.25rem 0.5rem; font-size: .85rem; }
+.error-message {
+    color: var(--error-color);
+    text-align: center;
+    margin-bottom: 1rem;
+}
 
-/* Cards and layout */
-.container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-.card { background: var(--surface); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
-.card h3 { margin-top: 0; margin-bottom: .75rem; }
+.app-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
 
-/* Forms */
-.form-group { margin-bottom: 1rem; }
-.form-group label { display: block; margin-bottom: .5rem; color: var(--muted); font-weight: 600; }
-.field { width: 100%; padding: .6rem .75rem; border-radius: 6px; border: 1px solid var(--border); background: #fff; color: var(--text); }
-.field:focus { outline: none; box-shadow: 0 0 0 4px rgba(11,99,255,0.08); border-color: var(--primary-600); }
-.error-message { color: var(--danger); }
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 2rem;
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
 
-/* Header and sidebar (keep existing class names but update visuals) */
-.app-header { display:flex; justify-content: space-between; align-items: center; padding: .75rem 1.25rem; background: var(--surface); border-bottom: 1px solid var(--border); }
-.app-logo { font-weight: 700; color: var(--primary); }
-.user-menu { display:flex; gap: .75rem; align-items: center; }
+.app-logo {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
 
-.sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 1rem; }
-.sidebar nav li a { color: var(--text); }
-.sidebar nav li a.active { background: var(--primary); color: #fff; }
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
-/* Dashboard */
-.dashboard-container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
-.dashboard-header { padding-bottom: 1rem; margin-bottom: 1.5rem; }
-.dashboard-header h1 { margin: 0; color: var(--text); }
-.dashboard-content { display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap: 1rem; }
+.app-body {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
 
-/* Topic / Task */
-.topics-list { width: 100%; }
-.topic-card { background: var(--surface); border-radius: 8px; padding: 1rem; border: 1px solid var(--border); margin-bottom: 1rem; }
-.topic-header { display:flex; justify-content: space-between; align-items:center; }
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background-color: var(--surface-color);
+    border-right: 1px solid var(--border-color);
+    padding: 1.5rem;
+    overflow-y: auto;
+}
 
-/* Modal styles */
-.modal-overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.45); display:flex; align-items: center; justify-content: center; padding: 1rem; z-index: 1000; }
-.modal-window { width: 100%; max-width: 680px; background: var(--surface); border-radius: 8px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-.modal-sm { max-width: 420px; }
-.modal-header { display:flex; justify-content: space-between; align-items:center; padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
-.modal-body { padding: 1rem; }
-.modal-footer { padding: .75rem 1rem; display:flex; gap: .5rem; justify-content: flex-end; border-top: 1px solid var(--border); }
+.sidebar nav h5 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
 
-/* Section headers (used in dashboards) */
-.section-header { display:flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .5rem; }
-.section-header h3 { margin: 0; font-size: 1.1rem; }
-.header-actions { display:flex; gap: .5rem; }
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 
-/* List items used in admin lists */
-.list-item { display:flex; justify-content: space-between; align-items: center; padding: .5rem 0; border-bottom: 1px dashed var(--border); }
-.list-item:last-child { border-bottom: none; }
-.item-actions { display:flex; gap: .5rem; }
+.sidebar nav li a {
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
 
-/* Improve typography */
-h1 { font-size: 1.6rem; margin: 0 0 .5rem 0; }
-h3 { font-size: 1.05rem; }
-p { margin: .5rem 0; }
+.sidebar nav li a:hover {
+    background-color: var(--border-color);
+}
 
-/* admin-actions container */
-.admin-actions { background: transparent; padding: .5rem 0; margin-bottom: 1rem; }
+.sidebar nav li a.active {
+    background-color: var(--primary-color);
+    color: white;
+}
 
-/* small button tweaks to keep consistent width behavior */
-.btn { min-height: 36px; }
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+}
 
-/* Utilities */
-.mt-1 { margin-top: .5rem; }
-.text-muted { color: var(--muted); }
-.sr-only { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
 
-/* Keep some legacy variable names for compatibility with components */
-:root { --primary-color: var(--primary); --primary-hover: var(--primary-600); --secondary-color: var(--muted); --bg-color: var(--bg); --surface-color: var(--surface); --text-color: var(--text); --text-muted: var(--muted); --border-color: var(--border); --error-color: var(--danger); }
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
 
-/* small responsive tweaks */
-@media (max-width: 700px) {
-    .sidebar { display: none; }
-    .dashboard-content { grid-template-columns: 1fr; }
+.dashboard-header h1 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.dashboard-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background-color: var(--surface-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.card ul {
+    padding-left: 0;
+    list-style: none;
+}
+
+.card li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card li:last-child {
+    border-bottom: none;
+}
+
+/* Прибираємо зайві хедери з дашбордів */
+.dashboard-container .dashboard-header {
+    border: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-container .dashboard-header div {
+    display: none; /* Ховаємо "Вітаємо" і "Вийти", бо вони є в хедері */
+}
+
+/* Стилі для сторінки курсу */
+.admin-actions {
+    background-color: var(--surface-color);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.topics-list {
+    width: 100%;
+}
+
+.topic-card {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1.5rem;
+}
+
+.topic-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.topic-header h3 {
+    margin: 0;
+}
+
+.btn-small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    width: auto;
+}
+
+.task-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.task-list li {
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    border-bottom: none;
+}
+
+.task-list li:hover {
+    background-color: var(--border-color);
+}
+
+.task-list li a {
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* Стилі для модального вікна */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    animation: modal-fade-in 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 2.5rem;
+    font-weight: 300;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body form .btn-primary {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+@keyframes modal-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-control-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+/* Стилі для кнопок (додаємо червону) */
+.btn-danger {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--error-color);
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--error-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: auto;
+}
+
+.btn-danger:hover {
+    background-color: var(--error-color);
+    color: white;
+}
+
+/* Стилі для списку користувачів */
+.user-list {
+    padding-left: 0;
+    list-style: none;
+}
+
+.user-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.user-list-item:last-child {
+    border-bottom: none;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-role {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.user-group {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+}
+
+.user-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Оновлення для .admin-actions, щоб кнопки були в ряд */
+.admin-actions {
+    background-color: var(--surface-color);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap; /* Дозволяє перенос на малих екранах */
+    gap: 1rem; /* Відстань між кнопками */
+}
+
+/* Змушуємо кнопки в .admin-actions мати авто-ширину */
+.admin-actions .btn-primary,
+.admin-actions .btn-secondary {
+    width: auto;
 }

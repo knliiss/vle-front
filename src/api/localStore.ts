@@ -31,7 +31,6 @@ function writeStore(store: StoreShape) {
 }
 
 function generateId(): number {
-    // keep numeric id compatible with backend; use timestamp as fallback
     return Date.now();
 }
 
@@ -94,7 +93,6 @@ export const localStore = {
     deleteCourse: async (id: number): Promise<{ data: null }> => {
         const s = readStore();
         s.courses = s.courses.filter((c) => c.id !== id);
-        // also cascade topics/tasks belonging to this course
         s.topics = s.topics.filter((t) => t.courseId !== id);
         s.tasks = s.tasks.filter((tk) => tk.topicId == null || s.topics.find((t) => t.id === tk.topicId));
         writeStore(s);
@@ -113,23 +111,6 @@ export const localStore = {
         writeStore(s);
         return { data: group };
     },
-    updateGroup: async (id: number, data: Partial<Group>): Promise<{ data: Group }> => {
-        const s = readStore();
-        const idx = s.groups.findIndex((g) => g.id === id);
-        if (idx === -1) throw new Error("Group not found");
-        const updated = { ...s.groups[idx], ...data };
-        s.groups[idx] = updated;
-        writeStore(s);
-        return { data: updated };
-    },
-    deleteGroup: async (id: number): Promise<{ data: null }> => {
-        const s = readStore();
-        s.groups = s.groups.filter((g) => g.id !== id);
-        // unbind users from this group
-        s.users = s.users.map((u) => (u.groupId === id ? { ...u, groupId: undefined } : u));
-        writeStore(s);
-        return { data: null };
-    },
 
     getCourseTopics: async (courseId: number): Promise<{ data: Topic[] }> => {
         const s = readStore();
@@ -142,23 +123,6 @@ export const localStore = {
         s.topics.push(topic);
         writeStore(s);
         return { data: topic };
-    },
-    updateTopic: async (id: number, data: Partial<Topic>): Promise<{ data: Topic }> => {
-        const s = readStore();
-        const idx = s.topics.findIndex((t) => t.id === id);
-        if (idx === -1) throw new Error("Topic not found");
-        const updated = { ...s.topics[idx], ...data };
-        s.topics[idx] = updated;
-        writeStore(s);
-        return { data: updated };
-    },
-    deleteTopic: async (id: number): Promise<{ data: null }> => {
-        const s = readStore();
-        s.topics = s.topics.filter((t) => t.id !== id);
-        // also delete tasks for this topic
-        s.tasks = s.tasks.filter((tk) => tk.topicId !== id);
-        writeStore(s);
-        return { data: null };
     },
 
     getTopicTasks: async (topicId: number): Promise<{ data: Task[] }> => {
@@ -176,3 +140,4 @@ export const localStore = {
 };
 
 export default localStore;
+

@@ -1,41 +1,27 @@
-import React, { useEffect, useRef } from "react";
+import type { ReactNode } from 'react';
 
 interface ModalProps {
-    open: boolean;
+    show: boolean;
     onClose: () => void;
-    title?: string;
-    children?: React.ReactNode;
-    size?: "sm" | "md" | "lg";
+    title: string;
+    children: ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, size = "md" }) => {
-    const overlayRef = useRef<HTMLDivElement | null>(null);
-    const firstFocusRef = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        function onKey(e: KeyboardEvent) {
-            if (e.key === "Escape") onClose();
-        }
-        if (open) {
-            document.addEventListener("keydown", onKey);
-            setTimeout(() => {
-                const el = firstFocusRef.current?.querySelector("input, button, select, textarea");
-                (el as HTMLElement | null)?.focus();
-            }, 0);
-        }
-        return () => document.removeEventListener("keydown", onKey);
-    }, [open, onClose]);
-
-    if (!open) return null;
+const Modal = ({ show, onClose, title, children }: ModalProps) => {
+    if (!show) {
+        return null;
+    }
 
     return (
-        <div className="modal-overlay" ref={overlayRef} onMouseDown={(e) => { if (e.target === overlayRef.current) onClose(); }}>
-            <div className={`modal-window modal-${size}`} role="dialog" aria-modal="true" aria-label={title || "Modal"} ref={firstFocusRef}>
+        <div className="modal-backdrop" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3>{title}</h3>
-                    <button className="btn btn-secondary btn-small" onClick={onClose} aria-label="close">Закрити</button>
+                    <button onClick={onClose} className="modal-close-btn">&times;</button>
                 </div>
-                <div className="modal-body">{children}</div>
+                <div className="modal-body">
+                    {children}
+                </div>
             </div>
         </div>
     );

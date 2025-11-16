@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { FormEvent, ChangeEvent } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { commonApi, studentApi } from "../api/apiService";
@@ -12,56 +13,69 @@ const TaskPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        const fetchTask = async () => {
-            if (!taskId) return;
-            setLoading(true);
-            try {
-                const taskRes = await commonApi.getTaskById(Number(taskId));
-                setTask(taskRes.data);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [submitting, setSubmitting] = useState(false);
 
-                if (user?.role === "STUDENT") {
-                    const subRes = await studentApi.getMySubmissionsForTask(
-                        Number(taskId)
-                    );
-                    setSubmissions(subRes.data);
-                } else {
-                    // TODO: Логіка для вчителя/адміна (завантажити ВСІ роботи)
-                }
-            } catch (err) {
-                setError("Не вдалося завантажити завдання.");
-                console.error(err);
+    const fetchTaskAndSubmissions = async () => {
+        if (!taskId) return;
+        setLoading(true);
+        try {
+            const taskRes = await commonApi.getTaskById(Number(taskId));
+            setTask(taskRes.data);
+
+            if (user?.role === "STUDENT") {
+                const subRes = await studentApi.getMySubmissionsForTask(
+                    Number(taskId)
+                );
+                setSubmissions(subRes.data);
             }
-            setLoading(false);
-        };
-        fetchTask();
+        } catch (err) {
+            setError("Не вдалося завантажити завдання.");
+            console.error(err);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        fetchTaskAndSubmissions();
     }, [taskId, user]);
 
-    if (loading)
-        return (
-            <div className="dashboard-container">
-                <p>Завантаження...</p>
-            </div>
-        );
-    if (error)
-        return (
-            <div className="dashboard-container">
-                <p className="error-message">{error}</p>
-            </div>
-        );
-    if (!task)
-        return (
-            <div className="dashboard-container">
-                <p>Завдання не знайдено.</p>
-            </div>
-        );
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSelectedFile(e.target.files[0]);
+        }
+    };
+
+    const handleFileSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        if (!selectedFile || !taskId) {
+            alert("Будь ласка, виберіть файл");
+            return;
+        }
+        setSubmitting(true);
+        try {
+            await studentApi.submitFileTask(Number(taskId), selectedFile);
+            alert("Роботу успішно відправлено!");
+            setSelectedFile(null);
+            fetchTaskAndSubmissions(); // Оновлюємо список робіт
+        } catch (err) {
+            console.error("Помилка відправки файлу", err);
+            alert("Не вдалося відправити файл");
+        }
+        setSubmitting(false);
+    };
+
+
+    if (loading) return <div className="dashboard-container"><p>Завантаження...</p></div>;
+    if (error) return <div className="dashboard-container"><p className="error-message">{error}</p></div>;
+    if (!task) return <div className="dashboard-container"><p>Завдання не знайдено.</p></div>;
 
     return (
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <h1>Завдання: {task.name}</h1>
                 <Link
-                    to={`/course/${task.topicId}`}
+                    to={`/course/${task.topicId}`} // Припускаємо, що topicId є в Task
                     className="btn-secondary"
                     style={{ width: "auto" }}
                 >
@@ -86,8 +100,21 @@ const TaskPage = () => {
 
                 {user?.role === "STUDENT" && (
                     <section className="card">
-                        <h3>Здати роботу</h3>
-                        <p>Тут буде форма для відправки файлу або тексту.</p>
+                        <h3>Здати роботу (Файл)</h3>
+                        <form onSubmit={handleFileSubmit}>
+                            <div className="form-group">
+                                <label htmlFor="file-upload">Виберіть файл</label>
+                                <input
+                                    type="file"
+                                    id="file-upload"
+                                    onChange={handleFileChange}
+                                    style={{width: '100%'}}
+                                />
+                            </div>
+                            <button type="submit" className="btn-primary" style={{width: '100%'}} disabled={submitting || !selectedFile}>
+                                {submitting ? "Відправка..." : "Відправити"}
+                            </button>
+                        </form>
                     </section>
                 )}
 
@@ -95,9 +122,6 @@ const TaskPage = () => {
                     <section className="card">
                         <h3>Роботи студентів</h3>
                         <p>Тут буде список робіт для перевірки.</p>
-                        {/* ⭐️⭐️⭐️ ВИПРАВЛЕННЯ БУЛО ТУТ ⭐️⭐️⭐️
-              </Section> було змінено на </section>
-            */}
                     </section>
                 )}
 

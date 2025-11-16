@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
+import type { FormEvent } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { commonApi } from "../api/apiService";
+import { commonApi, adminApi } from "../api/apiService";
 import type { Topic } from "../types";
 import TopicItem from "../components/TopicItem";
-import TopicForm from "../components/TopicForm";
-import localStore from "../api/localStore";
+import Modal from "../components/Modal";
 
 const CoursePage = () => {
     const { courseId } = useParams<{ courseId: string }>();
@@ -14,25 +14,46 @@ const CoursePage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const [topicModalOpen, setTopicModalOpen] = useState(false);
+    const [showTopicModal, setShowTopicModal] = useState(false);
+    const [topicName, setTopicName] = useState("");
+    const [topicDescription, setTopicDescription] = useState("");
+
+    const fetchTopics = async () => {
+        if (!courseId) return;
+        setLoading(true);
+        try {
+            const res = await commonApi.getCourseTopics(Number(courseId));
+            setTopics(res.data);
+        } catch (err) {
+            setError("Не вдалося завантажити теми курсу.");
+            console.error(err);
+        }
+        setLoading(false);
+    };
 
     useEffect(() => {
-        const fetchTopics = async () => {
-            if (!courseId) return;
-            setLoading(true);
-            try {
-                const res = await commonApi.getCourseTopics(Number(courseId));
-                setTopics(res.data);
-            } catch (err) {
-                setError("Не вдалося завантажити теми курсу.");
-                console.error(err);
-                const res = await localStore.getCourseTopics(Number(courseId));
-                setTopics(res.data);
-            }
-            setLoading(false);
-        };
         fetchTopics();
     }, [courseId]);
+
+    const handleAddTopic = async (e: FormEvent) => {
+        e.preventDefault();
+        if (!courseId || !topicName) return;
+
+        try {
+            await adminApi.createTopic({
+                name: topicName,
+                description: topicDescription,
+                courseId: Number(courseId)
+            });
+            setShowTopicModal(false);
+            setTopicName("");
+            setTopicDescription("");
+            fetchTopics(); // Оновлюємо список тем
+        } catch (err) {
+            console.error("Помилка створення теми", err);
+            alert("Не вдалося створити тему");
+        }
+    };
 
     const canManageCourse = user?.role === "ADMINISTRATOR" || user?.role === "TEACHER";
 
@@ -45,51 +66,68 @@ const CoursePage = () => {
         }
     }
 
-    const handleCreateTopicSaved = async (topic: Topic) => {
-        try {
-            await commonApi.createTopic(Number(courseId), topic).then((res) => {
-                setTopics((prev) => [...prev, res.data]);
-            }).catch(async () => {
-                const res = await localStore.createTopic(Number(courseId), topic);
-                setTopics((prev) => [...prev, res.data]);
-            });
-        } catch (err) {
-            console.error("failed to create topic", err);
-        }
-    };
-
     if (loading) return <div className="dashboard-container"><p>Завантаження...</p></div>;
     if (error) return <div className="dashboard-container"><p className="error-message">{error}</p></div>;
 
     return (
-        <div className="dashboard-container">
-            <header className="dashboard-header">
-                <h1>Сторінка Курсу</h1>
-                <Link to={getDashboardLink()} className="btn-secondary btn" style={{width: 'auto'}}>
-                    Назад до панелі
-                </Link>
-            </header>
+        <>
+            <Modal title="Створити нову тему" show={showTopicModal} onClose={() => setShowTopicModal(false)}>
+                <form onSubmit={handleAddTopic}>
+                    <div className="form-group">
+                        <label htmlFor="topicName">Назва теми</label>
+                        <input
+                            type="text"
+                            id="topicName"
+                            value={topicName}
+                            onChange={(e) => setTopicName(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="topicDescription">Опис (необов'язково)</label>
+                        <input
+                            type="text"
+                            id="topicDescription"
+                            value={topicDescription}
+                            onChange={(e) => setTopicDescription(e.target.value)}
+                        />
+                    </div>
+                    <button type="submit" className="btn-primary">Створити</button>
+                </form>
+            </Modal>
 
-            {canManageCourse && (
-                <div className="admin-actions">
-                    <button className="btn btn-primary" style={{width: 'auto'}} onClick={() => setTopicModalOpen(true)}>Додати нову тему</button>
-                </div>
-            )}
+            <div className="dashboard-container">
+                <header className="dashboard-header">
+                    <h1>Сторінка Курсу</h1>
+                    <Link to={getDashboardLink()} className="btn-secondary" style={{width: 'auto'}}>
+                        Назад до панелі
+                    </Link>
+                </header>
 
-            <main>
-                <div className="topics-list">
-                    {topics.length > 0 ? (
-                        topics.map((topic) => (
-                            <TopicItem key={topic.id} topic={topic} userRole={user!.role} />
-                        ))
-                    ) : (
-                        <p>У цьому курсі ще немає тем.</p>
-                    )}
-                </div>
-            </main>
+                {canManageCourse && (
+                    <div className="admin-actions">
+                        <button onClick={() => setShowTopicModal(true)} className="btn-primary" style={{width: 'auto'}}>Додати нову тему</button>
+                    </div>
+                )}
 
-            <TopicForm open={topicModalOpen} onClose={() => setTopicModalOpen(false)} onSaved={handleCreateTopicSaved} courseId={Number(courseId)} />
-        </div>
+                <main>
+                    <div className="topics-list">
+                        {topics.length > 0 ? (
+                            topics.map((topic) => (
+                                <TopicItem
+                                    key={topic.id}
+                                    topic={topic}
+                                    userRole={user!.role}
+                                    onTaskCreated={fetchTopics}
+                                />
+                            ))
+                        ) : (
+                            <p>У цьому курсі ще немає тем.</p>
+                        )}
+                    </div>
+                </main>
+            </div>
+        </>
     );
 };
 
