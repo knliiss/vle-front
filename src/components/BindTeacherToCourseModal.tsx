@@ -3,78 +3,58 @@ import type { FormEvent } from "react";
 import { adminApi } from "../api/apiService";
 import type { User, Course } from "../types";
 import Modal from "./Modal";
+import { useToast } from "./ToastProvider";
 
-interface BindTeacherToCourseModalProps {
+interface Props {
     show: boolean;
     onClose: () => void;
     courses: Course[];
     users: User[];
 }
 
-const BindTeacherToCourseModal = ({ show, onClose, courses, users }: BindTeacherToCourseModalProps) => {
-    const [selectedCourseId, setSelectedCourseId] = useState<string>("");
-    const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
-    const [error, setError] = useState("");
+const BindTeacherToCourseModal = ({ show, onClose, courses, users }: Props) => {
+    const [cId, setCId] = useState("");
+    const [tId, setTId] = useState("");
 
     const teachers = users.filter(u => u.role === 'TEACHER');
+    const { notify } = useToast();
 
     useEffect(() => {
-        if (courses.length > 0) setSelectedCourseId(String(courses[0].id));
-        if (teachers.length > 0) setSelectedTeacherId(String(teachers[0].id));
-    }, [courses, teachers]);
+        if(courses.length) setCId(String(courses[0].id));
+        if(teachers.length) setTId(String(teachers[0].id));
+    }, [courses, users, show]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setError("");
-        if (!selectedCourseId || !selectedTeacherId) return;
-
+        if(!cId || !tId) return;
         try {
-            await adminApi.bindTeacherToCourse(Number(selectedTeacherId), Number(selectedCourseId));
+            await adminApi.bindTeacherToCourse(Number(tId), Number(cId));
             onClose();
-        } catch (err) {
-            console.error("Помилка призначення", err);
-            setError("Не вдалося призначити викладача.");
+            notify("Викладача призначено", 'success');
+        } catch(e) {
+            console.error(e);
+            notify("Помилка призначення", 'error');
         }
-    };
+    }
 
     return (
-        <Modal title="Призначити викладача на курс" show={show} onClose={onClose}>
+        <Modal title="Призначити викладача" show={show} onClose={onClose}>
             <form onSubmit={handleSubmit}>
-                {error && <p className="error-message">{error}</p>}
                 <div className="form-group">
-                    <label htmlFor="teacher">Викладач</label>
-                    <select
-                        id="teacher"
-                        value={selectedTeacherId}
-                        onChange={(e) => setSelectedTeacherId(e.target.value)}
-                        className="form-control-select"
-                    >
-                        {teachers.map(teacher => (
-                            <option key={teacher.id} value={teacher.id}>
-                                {teacher.username}
-                            </option>
-                        ))}
+                    <label>Курс</label>
+                    <select value={cId} onChange={e => setCId(e.target.value)} className="form-control-select">
+                        {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="course">Курс</label>
-                    <select
-                        id="course"
-                        value={selectedCourseId}
-                        onChange={(e) => setSelectedCourseId(e.target.value)}
-                        className="form-control-select"
-                    >
-                        {courses.map(course => (
-                            <option key={course.id} value={course.id}>
-                                {course.name}
-                            </option>
-                        ))}
+                    <label>Викладач</label>
+                    <select value={tId} onChange={e => setTId(e.target.value)} className="form-control-select">
+                        {teachers.map(t => <option key={t.id} value={t.id}>{t.fio || t.username}</option>)}
                     </select>
                 </div>
                 <button type="submit" className="btn-primary">Призначити</button>
             </form>
         </Modal>
-    );
-};
-
+    )
+}
 export default BindTeacherToCourseModal;

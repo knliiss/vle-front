@@ -39,7 +39,7 @@ const UserForm: React.FC<Props> = ({ open, initial, onClose, onSaved }) => {
     };
 
     return (
-        <Modal open={open} onClose={onClose} title={initial ? "Edit User" : "Create User"}>
+        <Modal show={open} onClose={onClose} title={initial ? "Edit User" : "Create User"}>
             <div className="form-group">
                 <label>Username</label>
                 <input className="field" value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -62,4 +62,3 @@ const UserForm: React.FC<Props> = ({ open, initial, onClose, onSaved }) => {
 };
 
 export default UserForm;
-

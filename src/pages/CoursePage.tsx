@@ -6,6 +6,7 @@ import { commonApi, adminApi } from "../api/apiService";
 import type { Topic } from "../types";
 import TopicItem from "../components/TopicItem";
 import Modal from "../components/Modal";
+import { useToast } from "../components/ToastProvider";
 
 const CoursePage = () => {
     const { courseId } = useParams<{ courseId: string }>();
@@ -17,6 +18,7 @@ const CoursePage = () => {
     const [showTopicModal, setShowTopicModal] = useState(false);
     const [topicName, setTopicName] = useState("");
     const [topicDescription, setTopicDescription] = useState("");
+    const { notify } = useToast();
 
     const fetchTopics = async () => {
         if (!courseId) return;
@@ -51,7 +53,7 @@ const CoursePage = () => {
             fetchTopics(); // Оновлюємо список тем
         } catch (err) {
             console.error("Помилка створення теми", err);
-            alert("Не вдалося створити тему");
+            notify("Не вдалося створити тему", 'error');
         }
     };
 

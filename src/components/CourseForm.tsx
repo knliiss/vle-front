@@ -37,7 +37,7 @@ const CourseForm: React.FC<Props> = ({ open, initial, onClose, onSaved }) => {
     };
 
     return (
-        <Modal open={open} onClose={onClose} title={initial ? "Edit Course" : "Create Course"}>
+        <Modal show={open} onClose={onClose} title={initial ? "Edit Course" : "Create Course"}>
             <div className="form-group">
                 <label>Name</label>
                 <input className="field" value={name} onChange={(e) => setName(e.target.value)} />
@@ -52,4 +52,3 @@ const CourseForm: React.FC<Props> = ({ open, initial, onClose, onSaved }) => {
 };
 
 export default CourseForm;
-

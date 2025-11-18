@@ -1,179 +1,184 @@
+/* =========================================
+   1. Змінні та Теми (Design Tokens)
+   ========================================= */
 :root {
-    --primary-color: #007bff;
-    --primary-hover: #0056b3;
-    --secondary-color: #6c757d;
-    --secondary-hover: #5a6268;
-    --bg-color: #121212;
-    --surface-color: #1e1e1e;
-    --text-color: #e0e0e0;
-    --text-muted: #888;
-    --border-color: #333;
-    --error-color: #cf6679;
+    /* --- Світла тема (Light Mode) --- */
+    --bg-body: #f4f4f5;             /* Zinc 100 - Світлий фон сторінки */
+    --bg-surface: #ffffff;          /* Чисто білі картки */
+    --bg-sidebar: rgba(255, 255, 255, 0.85); /* Напівпрозорий сайдбар */
+
+    --text-main: #18181b;           /* Zinc 950 - Основний текст */
+    --text-secondary: #71717a;      /* Zinc 500 - Додатковий текст */
+    --text-inverse: #ffffff;        /* Текст на кнопках */
+
+    --primary: #2563eb;             /* Яскравий синій (Royal Blue) */
+    --primary-hover: #1d4ed8;       /* Темніший синій */
+    --primary-light: rgba(37, 99, 235, 0.1); /* Фон для активних елементів */
+
+    --border: #e4e4e7;              /* Zinc 200 - Межі */
+    --border-focus: #2563eb;        /* Колір фокусу */
+
+    --error: #ef4444;               /* Червоний */
+    --error-bg: rgba(239, 68, 68, 0.1);
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    --ease-spring: cubic-bezier(0.4, 0, 0.2, 1); /* Плавна анімація */
+
+    --choice-size: 20px;
+}
+
+/* --- Темна тема (Dark Mode - Monochrome) --- */
+[data-theme='dark'] {
+    --bg-body: #09090b;             /* Zinc 950 - Глибокий чорний */
+    --bg-surface: #18181b;          /* Zinc 900 - Темно-сірий для карток */
+    --bg-sidebar: rgba(24, 24, 27, 0.8); /* Напівпрозорий темний */
+
+    --text-main: #fafafa;           /* Zinc 50 - Майже білий */
+    --text-secondary: #a1a1aa;      /* Zinc 400 - Світло-сірий */
+    --text-inverse: #09090b;        /* Чорний текст (для білих кнопок) */
+
+    /* У темній темі акцент не синій, а білий/сталевий для строгого стилю */
+    --primary: #e4e4e7;             /* Zinc 200 */
+    --primary-hover: #ffffff;       /* Чисто білий */
+    --primary-light: rgba(255, 255, 255, 0.1);
+
+    --border: #27272a;              /* Zinc 800 - Темні межі */
+    --border-focus: #e4e4e7;
+
+    --error: #f87171;
+    --error-bg: rgba(248, 113, 113, 0.1);
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+
+    --choice-size: 20px;
+}
+
+/* =========================================
+   2. Глобальні налаштування
+   ========================================= */
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    line-height: 1.6;
-}
-
-input, button {
-    font-family: inherit;
-    font-size: 1rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    line-height: 1.5;
+    transition: background-color 0.3s var(--ease-spring), color 0.3s var(--ease-spring);
+    -webkit-font-smoothing: antialiased;
 }
 
 a {
-    color: var(--primary-color);
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--primary-hover);
     text-decoration: none;
 }
-a:hover {
-    text-decoration: underline;
+
+/* Скролбар */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
 }
 
-.auth-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-.auth-form {
-    background-color: var(--surface-color);
-    padding: 2.5rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 400px;
-}
-
-.auth-form h2 {
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: var(--primary-color);
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--text-muted);
-}
-
-.form-group input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    box-sizing: border-box;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.btn-primary {
-    width: 100%;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 4px;
-    background-color: var(--primary-color);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-}
-
-.btn-primary:disabled {
-    background-color: var(--secondary-color);
-    cursor: not-allowed;
-}
-
-.btn-secondary {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: transparent;
-    color: var(--primary-color);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-secondary:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.error-message {
-    color: var(--error-color);
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
+/* =========================================
+   3. Лейаут (Layout Structure)
+   ========================================= */
 .app-layout {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow: hidden;
 }
 
-.app-header {
+.app-body {
     display: flex;
-    justify-content: space-between;
+    flex: 1;
+    overflow: hidden; /* Щоб скролився тільки контент */
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    scroll-behavior: smooth;
+}
+
+.dashboard-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    animation: fade-in 0.4s var(--ease-spring);
+}
+
+/* =========================================
+   4. Хедер та Сайдбар
+   ========================================= */
+.app-header {
+    height: 64px;
+    display: flex;
     align-items: center;
-    padding: 0.75rem 2rem;
-    background-color: var(--surface-color);
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
+    justify-content: space-between;
+    padding: 0 2rem;
+    background-color: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
 }
 
 .app-logo {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-main);
 }
 
 .user-menu {
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-.app-body {
-    display: flex;
-    flex-grow: 1;
-    overflow: hidden;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
 .sidebar {
-    width: 280px;
+    width: 260px;
     flex-shrink: 0;
-    background-color: var(--surface-color);
-    border-right: 1px solid var(--border-color);
-    padding: 1.5rem;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 1rem;
     overflow-y: auto;
-}
-
-.sidebar nav h5 {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+    transition: transform var(--ease-spring), box-shadow var(--ease-spring), opacity var(--ease-spring);
 }
 
 .sidebar nav ul {
@@ -182,199 +187,292 @@ a:hover {
     margin: 0;
 }
 
+.sidebar nav h5 {
+    margin: 1.5rem 0 0.5rem 0.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
 .sidebar nav li a {
     display: block;
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    color: var(--text-color);
-    text-decoration: none;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
     font-weight: 500;
-    transition: background-color 0.2s ease;
+    font-size: 0.9rem;
+    transition: all 0.2s var(--ease-spring);
 }
 
 .sidebar nav li a:hover {
-    background-color: var(--border-color);
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    transform: translateX(3px);
 }
 
 .sidebar nav li a.active {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--primary-light);
+    color: var(--primary); /* В темній темі це буде білий */
 }
 
-.main-content {
-    flex-grow: 1;
-    overflow-y: auto;
-}
-
-.dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
-}
-
-.dashboard-header h1 {
-    margin: 0;
-    color: var(--primary-color);
-}
-
-.dashboard-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
+/* =========================================
+   5. Картки (Cards)
+   ========================================= */
 .card {
-    background-color: var(--surface-color);
-    border-radius: 8px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s var(--ease-spring), box-shadow 0.2s var(--ease-spring), border-color 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--text-secondary); /* Легкий акцент при наведенні */
 }
 
 .card h3 {
     margin-top: 0;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
 }
 
+.dashboard-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Списки всередині карток */
 .card ul {
     padding-left: 0;
     list-style: none;
 }
 
 .card li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .card li:last-child {
     border-bottom: none;
 }
 
-/* Прибираємо зайві хедери з дашбордів */
-.dashboard-container .dashboard-header {
-    border: none;
-    padding: 0;
-    margin-bottom: 1.5rem;
+.card li strong {
+    color: var(--text-main);
 }
 
-.dashboard-container .dashboard-header div {
-    display: none; /* Ховаємо "Вітаємо" і "Вийти", бо вони є в хедері */
+/* =========================================
+   6. Кнопки (Buttons)
+   ========================================= */
+button {
+    cursor: pointer;
+    font-family: inherit;
 }
 
-/* Стилі для сторінки курсу */
-.admin-actions {
-    background-color: var(--surface-color);
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-}
-
-.topics-list {
-    width: 100%;
-}
-
-.topic-card {
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 1.5rem;
-}
-
-.topic-header {
-    display: flex;
-    justify-content: space-between;
+/* Базовий стиль кнопки */
+.btn-primary, .btn-secondary, .btn-danger {
+    display: inline-flex;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.2s var(--ease-spring);
+    line-height: 1.2;
 }
 
-.topic-header h3 {
-    margin: 0;
+/* Основна кнопка */
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--text-inverse); /* Чорний текст в темній темі */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Вторинна кнопка (Outline) */
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-main);
+    border-color: var(--border);
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-body);
+    border-color: var(--text-secondary);
+}
+
+/* Небезпечна кнопка */
+.btn-danger {
+    background-color: transparent;
+    color: var(--error);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    background-color: var(--error-bg);
+    border-color: var(--error);
 }
 
 .btn-small {
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.6rem;
     font-size: 0.8rem;
-    width: auto;
 }
 
-.task-list {
-    list-style: none;
-    padding-left: 0;
-    margin: 0;
+.admin-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
 }
 
-.task-list li {
-    padding: 0.5rem;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-    border-bottom: none;
+/* =========================================
+   7. Форми (Forms & Inputs)
+   ========================================= */
+.form-group {
+    margin-bottom: 1.25rem;
 }
 
-.task-list li:hover {
-    background-color: var(--border-color);
-}
-
-.task-list li a {
-    text-decoration: none;
-    color: var(--primary-color);
+.form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
     font-weight: 500;
+    color: var(--text-main);
 }
 
-/* Стилі для модального вікна */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="email"],
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    background-color: var(--bg-surface); /* was var(--bg-body) for light theme, now pure surface for better contrast */
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+}
+
+/* Dark theme input overrides for stronger contrast */
+[data-theme='dark'] input[type="text"],
+[data-theme='dark'] input[type="password"],
+[data-theme='dark'] input[type="number"],
+[data-theme='dark'] input[type="email"],
+[data-theme='dark'] input[type="file"],
+[data-theme='dark'] select,
+[data-theme='dark'] textarea,
+[data-theme='dark'] .input-large,
+[data-theme='dark'] .input-inline,
+[data-theme='dark'] .option-row input,
+[data-theme='dark'] .input-score {
+    background-color: #1e1e21; /* slightly lighter than body for visual separation */
+    color: #fafafa;
+    border-color: #2e2e33;
+}
+[data-theme='dark'] .option-handle,
+[data-theme='dark'] .option-left {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border-color: #2e2e33;
+    color: #d4d4d8;
+}
+
+/* Placeholder colors */
+input::placeholder, textarea::placeholder { color: #9ca3af; }
+[data-theme='dark'] input::placeholder, [data-theme='dark'] textarea::placeholder { color: #6b6b70; }
+
+/* Focus adjustments for dark theme */
+[data-theme='dark'] input:focus, [data-theme='dark'] select:focus, [data-theme='dark'] textarea:focus, [data-theme='dark'] .input-large:focus, [data-theme='dark'] .input-inline:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+}
+
+/* Light theme specific option handle subtle tweak */
+.option-handle, .option-left { background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0)); }
+
+/* =========================================
+   8. Модальні вікна (Modals)
+   ========================================= */
 .modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 100;
+    animation: fade-in 0.2s ease-out;
 }
 
 .modal-content {
-    background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    animation: modal-fade-in 0.3s ease;
+    background-color: var(--bg-surface);
+    width: 90%;
+    max-width: 480px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    animation: scale-up 0.3s var(--ease-spring);
 }
 
 .modal-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
     margin: 0;
-    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
 }
 
 .modal-close-btn {
     background: none;
     border: none;
-    color: var(--text-muted);
-    font-size: 2.5rem;
-    font-weight: 300;
-    cursor: pointer;
-    padding: 0;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
     line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+    color: var(--text-main);
 }
 
 .modal-body {
@@ -384,100 +482,265 @@ a:hover {
 .modal-body form .btn-primary {
     width: 100%;
     margin-top: 1rem;
-}
-
-@keyframes modal-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.form-control-select {
-    width: 100%;
     padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    box-sizing: border-box;
-    font-size: 1rem;
 }
 
-/* Стилі для кнопок (додаємо червону) */
-.btn-danger {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--error-color);
-    border-radius: 4px;
-    background-color: transparent;
-    color: var(--error-color);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: auto;
-}
-
-.btn-danger:hover {
-    background-color: var(--error-color);
-    color: white;
-}
-
-/* Стилі для списку користувачів */
-.user-list {
-    padding-left: 0;
-    list-style: none;
-}
-
-.user-list-item {
+/* =========================================
+   9. Сторінка Логіну
+   ========================================= */
+.auth-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border-color);
+    min-height: 100vh;
+    background-color: var(--bg-body);
+    background-image: radial-gradient(circle at 50% 0%, var(--primary-light), transparent 40%);
 }
 
-.user-list-item:last-child {
-    border-bottom: none;
+.auth-form {
+    width: 100%;
+    max-width: 380px;
+    background-color: var(--bg-surface);
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
 }
 
-.user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.user-role {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.user-group {
-    font-size: 0.9rem;
-    color: var(--primary-color);
-}
-
-.user-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Оновлення для .admin-actions, щоб кнопки були в ряд */
-.admin-actions {
-    background-color: var(--surface-color);
-    padding: 1rem;
-    border-radius: 8px;
+.auth-form h2 {
+    text-align: center;
     margin-bottom: 1.5rem;
-    display: flex;
-    flex-wrap: wrap; /* Дозволяє перенос на малих екранах */
-    gap: 1rem; /* Відстань між кнопками */
+    font-size: 1.5rem;
+    color: var(--text-main);
 }
 
-/* Змушуємо кнопки в .admin-actions мати авто-ширину */
-.admin-actions .btn-primary,
-.admin-actions .btn-secondary {
-    width: auto;
+.error-message {
+    color: var(--error);
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: var(--error-bg);
+    border-radius: var(--radius-sm);
+}
+
+/* =========================================
+   10. Анімації
+   ========================================= */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scale-up {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes choice-pulse {
+  0% { box-shadow: 0 0 0 0 var(--primary-light); }
+  50% { box-shadow: 0 0 0 6px var(--primary-light); }
+  100% { box-shadow: 0 0 0 0 var(--primary-light); }
+}
+
+/* =========================================
+   11. Адаптивність
+   ========================================= */
+@media (max-width: 768px) {
+    .app-body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 1rem;
+    }
+
+    .dashboard-content {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-actions {
+        flex-direction: column;
+    }
+
+    .admin-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform var(--ease-spring), box-shadow var(--ease-spring), opacity var(--ease-spring);
+    z-index: 999;
+    box-shadow: var(--shadow-lg);
+    opacity: 1;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  .sidebar-overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    backdrop-filter: blur(2px);
+    z-index: 998;
+    transition: opacity var(--ease-spring);
+    opacity: 1;
+  }
+}
+
+@media (min-width: 901px) {
+  .sidebar {
+    position: static;
+    transform: none !important;
+    opacity: 1 !important;
+    box-shadow: var(--shadow-sm);
+  }
+  .sidebar-overlay-backdrop {
+    display: none !important;
+  }
+}
+
+.app-footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg-sidebar);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem 2rem;
+  display: flex;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.footer-inner { width:100%; max-width:1100px; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.footer-link { color: var(--text-secondary); text-decoration:none; font-weight:500; }
+.footer-link:hover { color: var(--text-main); }
+.footer-hint { font-size:0.75rem; opacity:.8; }
+
+.stat-tile { background: var(--bg-body); border:1px solid var(--border); border-radius: var(--radius-sm); padding:.75rem .9rem; display:flex; flex-direction:column; gap:.35rem; box-shadow: var(--shadow-sm); transition: box-shadow .2s, transform .2s; }
+.stat-tile strong { font-size:1.1rem; line-height:1; }
+.stat-tile span { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color: var(--text-secondary); }
+.stat-tile:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.users-table-sticky thead tr { position: sticky; top: 0; background: var(--bg-surface); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.users-table-sticky thead th { z-index: 2; }
+.chart-card { background: var(--bg-surface); border:1px solid var(--border); border-radius: var(--radius-sm); padding:0.75rem 0.9rem; flex:1 1 240px; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:0.5rem; }
+.chart-card h4 { margin:0 0 .5rem; font-size:0.9rem; font-weight:600; color: var(--text-main); }
+.bar-chart { display:flex; height:16px; width:100%; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+.bar-segment { transition: flex .4s var(--ease-spring), background .3s; }
+.chart-legend { display:flex; gap:.75rem; flex-wrap:wrap; font-size:.65rem; text-transform:uppercase; letter-spacing:.05em; color: var(--text-secondary); }
+.legend-color { width:12px; height:12px; display:inline-block; border-radius:3px; margin-right:4px; border:1px solid var(--border); }
+.users-tools input, .users-tools select { background: var(--bg-body); border:1px solid var(--border); border-radius: var(--radius-sm); padding:0.5rem .65rem; font-size:.85rem; }
+.users-tools input:focus, .users-tools select:focus { outline:none; border-color: var(--primary); box-shadow:0 0 0 2px var(--primary-light); }
+[data-theme='dark'] .users-tools input { color: #ffffff; }
+[data-theme='dark'] .users-tools input::placeholder { color: #a1a1aa; }
+
+.user-row-selected { outline:2px solid var(--primary); outline-offset:-2px; background: var(--primary-light) !important; }
+.table-sort-btn { background:none; border:none; padding:0; color: var(--text-main); font: inherit; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:4px; }
+.table-sort-btn:hover { color: var(--primary); text-decoration: underline; }
+
+.test-form { animation: fade-in .3s var(--ease-spring); }
+.test-question { padding: .75rem .9rem; border:1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-surface); margin-bottom: 0.75rem; box-shadow: var(--shadow-sm); }
+.test-question-text { display:block; margin-bottom:.5rem; }
+.test-options { display:flex; flex-direction:column; gap:.4rem; }
+.test-option { position: relative; padding-left: 36px; min-height: 28px; display: flex; align-items: center; font-size: 0.85rem; cursor: pointer; user-select: none; }
+.test-option + .test-option { margin-top: 4px; }
+.test-option input[type="radio"],
+.test-option input[type="checkbox"] { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: var(--choice-size); height: var(--choice-size); margin: 0; opacity: 0; cursor: pointer; }
+
+.test-option input[type="radio"] + span,
+.test-option input[type="checkbox"] + span { position: relative; padding: 4px 0; display: inline-flex; align-items: center; line-height: 1.2; transition: color .2s, background .2s; }
+
+.test-option input[type="radio"] + span::before,
+.test-option input[type="checkbox"] + span::before { content: ""; position: absolute; left: -30px; top: 50%; transform: translateY(-50%); width: var(--choice-size); height: var(--choice-size); border: 2px solid var(--border); background: var(--bg-body); border-radius: 6px; box-sizing: border-box; transition: border-color .25s, background-color .25s, box-shadow .25s; }
+.test-option input[type="radio"] + span::before { border-radius: 50%; }
+
+/* Checked state */
+.test-option input:checked + span::before { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+.test-option input[type="radio"]:checked + span::before { box-shadow: 0 0 0 4px var(--primary-light), inset 0 0 0 4px var(--bg-surface); }
+
+/* Hover (only when not disabled) */
+.test-option input:not(:disabled) + span:hover::before { border-color: var(--primary); }
+.test-option input:not(:disabled) + span:hover { color: var(--text-main); }
+
+/* Focus visible */
+.test-option input:focus-visible + span::before { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Disabled */
+.test-option input:disabled + span { color: var(--text-secondary); cursor: not-allowed; opacity: .7; }
+.test-option input:disabled + span::before { border-color: var(--border); background: var(--bg-body); box-shadow: none; }
+.test-option input:disabled:checked + span::before { background: var(--primary-light); border-color: var(--border); }
+
+/* Dark theme adjustments */
+[data-theme='dark'] .test-option input[type="radio"] + span::before,
+[data-theme='dark'] .test-option input[type="checkbox"] + span::before { background: #121214; border-color: #2e2e33; }
+[data-theme='dark'] .test-option input:checked + span::before { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px rgba(255,255,255,0.12); }
+[data-theme='dark'] .test-option input[type="radio"]:checked + span::before { box-shadow: 0 0 0 4px rgba(255,255,255,0.12), inset 0 0 0 4px var(--bg-surface); }
+[data-theme='dark'] .test-option input:disabled:checked + span::before { background: rgba(255,255,255,0.15); border-color: #2e2e33; }
+
+/* Reduce motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .test-option input:checked + span::before,
+  .test-option input[type="radio"]:checked + span::before { animation: none !important; }
+}
+
+/* =========================================
+   12. Додаткові стилі для тестів
+   ========================================= */
+.test-editor-card { padding: 1rem; }
+.test-editor-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:0.75rem; }
+.test-editor-header h3 { margin:0; font-size:1.05rem; }
+
+.create-question { display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem; }
+.input-large { padding:0.65rem 0.8rem; font-size:0.95rem; border-radius: calc(var(--radius-sm) - 2px); border:1px solid var(--border); background: var(--bg-body); color: var(--text-main); transition: box-shadow .18s var(--ease-spring); }
+.input-large:focus { box-shadow: 0 4px 12px rgba(0,0,0,0.06); outline:none; border-color:var(--border-focus); }
+.create-row { display:flex; gap:0.5rem; align-items:center; }
+.input-score { width:110px; padding:0.5rem; border-radius: var(--radius-sm); border:1px solid var(--border); background:var(--bg-body); }
+
+.options-editor { display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem; }
+.option-row { display:flex; gap:0.5rem; align-items:center; }
+.option-handle { width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, rgba(0,0,0,0.03), transparent); border-radius:8px; border:1px solid var(--border); color:var(--text-secondary); font-weight:700; }
+.option-row input { flex:1; padding:0.45rem 0.6rem; border-radius:calc(var(--radius-sm) - 2px); border:1px solid var(--border); background:var(--bg-body); }
+
+.questions-list { display:flex; flex-direction:column; gap:0.75rem; }
+.question-card { border-radius: calc(var(--radius-sm)); padding:0.8rem; background: linear-gradient(180deg, var(--bg-surface), rgba(0,0,0,0.02)); box-shadow: var(--shadow-sm); border:1px solid var(--border); }
+.question-top { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+.question-title { display:flex; align-items:center; gap:0.75rem; flex:1; }
+.question-order { min-width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:var(--bg-body); border:1px solid var(--border); color:var(--text-secondary); font-weight:700; }
+.question-text { font-weight:600; color:var(--text-main); }
+.input-inline { padding:0.45rem 0.6rem; border-radius:calc(var(--radius-sm) - 2px); border:1px solid var(--border); min-width:240px; }
+
+.question-actions { display:flex; align-items:center; gap:0.5rem; }
+.action-group { display:flex; gap:0.35rem; align-items:center; }
+.btn-icon { background:transparent; border:1px solid transparent; padding:6px 8px; border-radius:8px; cursor:pointer; color:var(--text-secondary); transition:background .15s, color .15s; }
+.btn-icon:hover { background:var(--bg-body); color:var(--text-main); }
+.badge { background: var(--primary-light); color: var(--primary); padding:6px 8px; border-radius:8px; font-weight:600; font-size:0.75rem; border:1px solid var(--border); }
+
+.question-body { margin-top:0.6rem; display:flex; gap:1rem; align-items:flex-start; flex-direction:column; }
+.score-row { color:var(--text-secondary); font-size:0.9rem; }
+.options-list { display:flex; flex-direction:column; gap:0.5rem; margin-top:0.25rem; }
+.option-item { display:flex; gap:0.6rem; align-items:center; }
+.option-left { width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent); border:1px solid var(--border); color:var(--text-secondary); font-weight:700; }
+.option-text { color:var(--text-main); }
+
+.btn-primary.btn-small, .btn-secondary.btn-small, .btn-danger.btn-small { padding:6px 8px; }
+
+/* subtle animations */
+.question-card { transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-spring); }
+.question-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+
+@media (max-width: 700px) {
+  .create-row { flex-direction:column; align-items:stretch; }
+  .input-score { width:100%; }
+  .question-top { flex-direction:column; align-items:stretch; }
+  .question-actions { justify-content:flex-end; }
 }

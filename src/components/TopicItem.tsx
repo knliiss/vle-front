@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { commonApi, adminApi } from "../api/apiService";
 import type { Task, Topic, UserRole } from "../types";
 import Modal from "./Modal";
+import { useToast } from "./ToastProvider";
+import CreateTestTaskModal from "./CreateTestTaskModal";
 
 interface TopicItemProps {
     topic: Topic;
@@ -19,6 +21,8 @@ const TopicItem = ({ topic, userRole, onTaskCreated }: TopicItemProps) => {
     const [taskName, setTaskName] = useState("");
     const [taskDescription, setTaskDescription] = useState("");
     const [taskMaxMark, setTaskMaxMark] = useState(100);
+    const { notify } = useToast();
+    const [showTestModal, setShowTestModal] = useState(false);
 
     const fetchTasks = async () => {
         setLoading(true);
@@ -50,10 +54,11 @@ const TopicItem = ({ topic, userRole, onTaskCreated }: TopicItemProps) => {
             setTaskName("");
             setTaskDescription("");
             setTaskMaxMark(100);
-            onTaskCreated(); // Викликаємо оновлення
+            onTaskCreated(); // Оновлюємо
+            notify("Завдання створено", 'success');
         } catch (err) {
             console.error("Помилка створення завдання", err);
-            alert("Не вдалося створити завдання");
+            notify("Не вдалося створити завдання", 'error');
         }
     };
 
@@ -96,6 +101,8 @@ const TopicItem = ({ topic, userRole, onTaskCreated }: TopicItemProps) => {
                 </form>
             </Modal>
 
+            <CreateTestTaskModal show={showTestModal} onClose={() => setShowTestModal(false)} topicId={topic.id} onTaskCreated={onTaskCreated} />
+
             <section className="card topic-card">
                 <div className="topic-header">
                     <h3>{topic.name}</h3>
@@ -119,9 +126,14 @@ const TopicItem = ({ topic, userRole, onTaskCreated }: TopicItemProps) => {
                 )}
 
                 {canManage && (
-                    <button onClick={() => setShowTaskModal(true)} className="btn-primary btn-small" style={{ marginTop: '1rem', width: 'auto' }}>
-                        Додати завдання
-                    </button>
+                    <div style={{ display:'flex', gap: 8, flexWrap:'wrap' }}>
+                        <button onClick={() => setShowTaskModal(true)} className="btn-primary btn-small" style={{ marginTop: '1rem', width: 'auto' }}>
+                            Додати завдання (файл)
+                        </button>
+                        <button onClick={() => setShowTestModal(true)} className="btn-secondary btn-small" style={{ marginTop: '1rem', width: 'auto' }}>
+                            Додати тест
+                        </button>
+                    </div>
                 )}
             </section>
         </>

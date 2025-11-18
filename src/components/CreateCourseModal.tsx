@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { adminApi } from "../api/apiService";
 import Modal from "./Modal";
+import { useToast } from "./ToastProvider";
 
 interface CreateCourseModalProps {
     show: boolean;
@@ -11,35 +12,28 @@ interface CreateCourseModalProps {
 
 const CreateCourseModal = ({ show, onClose, onCourseCreated }: CreateCourseModalProps) => {
     const [courseName, setCourseName] = useState("");
-    const [error, setError] = useState("");
+    const { notify } = useToast();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setError("");
         try {
             await adminApi.createCourse({ name: courseName });
             onCourseCreated();
             onClose();
             setCourseName("");
+            notify("Курс створено", 'success');
         } catch (err) {
-            console.error("Помилка створення курсу", err);
-            setError("Не вдалося створити курс.");
+            console.error(err);
+            notify("Помилка при створенні курсу", 'error');
         }
     };
 
     return (
-        <Modal title="Створити новий курс" show={show} onClose={onClose}>
+        <Modal title="Новий курс" show={show} onClose={onClose}>
             <form onSubmit={handleSubmit}>
-                {error && <p className="error-message">{error}</p>}
                 <div className="form-group">
-                    <label htmlFor="courseName">Назва курсу</label>
-                    <input
-                        type="text"
-                        id="courseName"
-                        value={courseName}
-                        onChange={(e) => setCourseName(e.target.value)}
-                        required
-                    />
+                    <label htmlFor="cname">Назва курсу</label>
+                    <input type="text" id="cname" value={courseName} onChange={e => setCourseName(e.target.value)} required />
                 </div>
                 <button type="submit" className="btn-primary">Створити</button>
             </form>

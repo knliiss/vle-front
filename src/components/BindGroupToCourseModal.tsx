@@ -3,76 +3,56 @@ import type { FormEvent } from "react";
 import { adminApi } from "../api/apiService";
 import type { Group, Course } from "../types";
 import Modal from "./Modal";
+import { useToast } from "./ToastProvider";
 
-interface BindGroupToCourseModalProps {
+interface Props {
     show: boolean;
     onClose: () => void;
     courses: Course[];
     groups: Group[];
 }
 
-const BindGroupToCourseModal = ({ show, onClose, courses, groups }: BindGroupToCourseModalProps) => {
-    const [selectedCourseId, setSelectedCourseId] = useState<string>("");
-    const [selectedGroupId, setSelectedGroupId] = useState<string>("");
-    const [error, setError] = useState("");
+const BindGroupToCourseModal = ({ show, onClose, courses, groups }: Props) => {
+    const [cId, setCId] = useState("");
+    const [gId, setGId] = useState("");
+    const { notify } = useToast();
 
     useEffect(() => {
-        if (courses.length > 0) setSelectedCourseId(String(courses[0].id));
-        if (groups.length > 0) setSelectedGroupId(String(groups[0].id));
-    }, [courses, groups]);
+        if(courses.length) setCId(String(courses[0].id));
+        if(groups.length) setGId(String(groups[0].id));
+    }, [courses, groups, show]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setError("");
-        if (!selectedCourseId || !selectedGroupId) return;
-
+        if(!cId || !gId) return;
         try {
-            await adminApi.bindCourseToGroup(Number(selectedCourseId), Number(selectedGroupId));
+            await adminApi.bindCourseToGroup(Number(cId), Number(gId));
             onClose();
-        } catch (err) {
-            console.error("Помилка призначення", err);
-            setError("Не вдалося призначити групу.");
+            notify("Групу додано до курсу", 'success');
+        } catch(e) {
+            console.error(e);
+            notify("Помилка", 'error');
         }
-    };
+    }
 
     return (
         <Modal title="Додати групу до курсу" show={show} onClose={onClose}>
             <form onSubmit={handleSubmit}>
-                {error && <p className="error-message">{error}</p>}
                 <div className="form-group">
-                    <label htmlFor="group">Група</label>
-                    <select
-                        id="group"
-                        value={selectedGroupId}
-                        onChange={(e) => setSelectedGroupId(e.target.value)}
-                        className="form-control-select"
-                    >
-                        {groups.map(group => (
-                            <option key={group.id} value={group.id}>
-                                {group.name}
-                            </option>
-                        ))}
+                    <label>Курс</label>
+                    <select value={cId} onChange={e => setCId(e.target.value)} className="form-control-select">
+                        {courses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="course">Курс</label>
-                    <select
-                        id="course"
-                        value={selectedCourseId}
-                        onChange={(e) => setSelectedCourseId(e.target.value)}
-                        className="form-control-select"
-                    >
-                        {courses.map(course => (
-                            <option key={course.id} value={course.id}>
-                                {course.name}
-                            </option>
-                        ))}
+                    <label>Група</label>
+                    <select value={gId} onChange={e => setGId(e.target.value)} className="form-control-select">
+                        {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                     </select>
                 </div>
                 <button type="submit" className="btn-primary">Додати</button>
             </form>
         </Modal>
-    );
-};
-
+    )
+}
 export default BindGroupToCourseModal;

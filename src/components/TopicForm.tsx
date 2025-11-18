@@ -40,7 +40,7 @@ const TopicForm: React.FC<Props> = ({ open, initial, courseId, onClose, onSaved 
     };
 
     return (
-        <Modal open={open} onClose={onClose} title={initial ? "Edit Topic" : "Create Topic"}>
+        <Modal show={open} onClose={onClose} title={initial ? "Edit Topic" : "Create Topic"}>
             <div className="form-group">
                 <label>Name</label>
                 <input className="field" value={name} onChange={(e) => setName(e.target.value)} />
@@ -59,4 +59,3 @@ const TopicForm: React.FC<Props> = ({ open, initial, courseId, onClose, onSaved 
 };
 
 export default TopicForm;
-

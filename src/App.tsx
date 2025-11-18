@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import {AuthProvider, useAuth} from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
+import DevOverlayGuard from "./components/DevOverlayGuard";
 
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -10,6 +11,9 @@ import StudentDashboard from "./pages/StudentDashboard";
 import NotFoundPage from "./pages/NotFoundPage";
 import CoursePage from "./pages/CoursePage";
 import TaskPage from "./pages/TaskPage";
+import AdminGroupsPage from "./pages/AdminGroupsPage";
+import AdminCoursesPage from "./pages/AdminCoursesPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 
 import "./styles/main.css";
 
@@ -17,6 +21,7 @@ const App = () => {
     return (
         <AuthProvider>
             <BrowserRouter>
+                <DevOverlayGuard />
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
 
@@ -27,6 +32,9 @@ const App = () => {
                             }
                         >
                             <Route path="/admin" element={<AdminDashboard />} />
+                            <Route path="/admin/groups" element={<AdminGroupsPage />} />
+                            <Route path="/admin/courses" element={<AdminCoursesPage />} />
+                            <Route path="/admin/users" element={<AdminUsersPage />} />
                         </Route>
 
                         <Route

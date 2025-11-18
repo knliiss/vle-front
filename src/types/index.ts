@@ -1,21 +1,95 @@
+// src/types/index.ts
+
+// --- ENUMS ---
+
 export type UserRole = "ADMINISTRATOR" | "TEACHER" | "STUDENT";
 
+export type SubmissionStatus =
+    | "ADDED"
+    | "GRADED"
+    | "RETURNED"
+    | "REMOVED"
+    | "OVERDUE";
+
+// --- USER & PROFILES ---
+
+/** Базовий об'єкт користувача (UserDto) */
 export interface User {
     id: number;
     username: string;
     role: UserRole;
-    groupId?: number;
+    fio?: string;       // Повне ім'я (ФИО)
     avatarUrl?: string;
+    groupId?: number;   // ID групи (для студентів, сумісність)
+}
+
+/** Розширений об'єкт користувача (UserExtendedDto) */
+export interface UserExtended extends User {
+    // Поля для студента
+    groupId?: number;
+
+    // Поля для викладача та адміністратора
+    academicTitle?: string;    // Вчене звання
+    department?: string;       // Кафедра / Відділ
+    workPhone?: string;        // Робочий телефон
+    scientificDegree?: string; // Науковий ступінь
+}
+
+// --- REQUEST DTOS (Для відправки даних на сервер) ---
+
+export interface UserCreateRequest {
+    username: string;
+    password: string;
+    role: string; // Або UserRole
+    fio?: string;
+    groupId?: number;
+}
+
+export interface UserUpdateRequest {
+    avatarUrl?: string;
+    password?: string; // Plain text, буде захешовано
+    fio?: string;
+    groupId?: number;
+}
+
+export interface TeacherProfileUpdateRequest {
+    academicTitle?: string;
+    department?: string;
+    workPhone?: string;
+    scientificDegree?: string;
+}
+
+export interface StudentProfileUpdateRequest {
+    groupId?: number;
+}
+
+export interface AdminProfileUpdateRequest {
+    department?: string;
+}
+
+// --- AUTH ---
+
+export interface TokenPairResponse {
+    accessToken: string;
+    refreshToken: string;
 }
 
 export interface AuthContextType {
-    user: User | null;
+    user: UserExtended | null; // Використовуємо розширений тип у контексті
     token: string | null;
     login: (token: string) => Promise<void>;
     logout: () => void;
 }
 
+// --- LMS ENTITIES ---
+
 export interface Course {
+    id: number;
+    name: string;
+}
+
+// Використовується для списків, де може бути менше полів ніж у повній сутності
+export interface CourseDto {
     id: number;
     name: string;
 }
@@ -25,11 +99,22 @@ export interface Group {
     name: string;
 }
 
+export interface GroupDto {
+    id: number;
+    name: string;
+}
+
 export interface Topic {
     id: number;
     name: string;
     description?: string;
-    courseId?: number;
+    courseId: number;
+}
+
+export interface TopicDto {
+    name: string;
+    description?: string;
+    courseId: number;
 }
 
 export interface Task {
@@ -37,18 +122,30 @@ export interface Task {
     name: string;
     description?: string;
     maxMark?: number;
-    creationDate?: string;
-    dueDate?: string;
-    topicId?: number;
+    creationDate?: string; // ISO Date string
+    dueDate?: string;      // ISO Date string
+    topicId: number;
+    taskType?: string; // NEW: e.g. TEST, LAB
 }
 
-export type SubmissionStatus =
-    | "ADDED"
-    | "GRADED"
-    | "RETURNED"
-    | "REMOVED"
-    | "OVERDUE";
+export interface TaskDto {
+    name: string;
+    description?: string;
+    maxMark?: number;
+    dueDate?: string;
+    topicId: number;
+    taskType?: string; // NEW
+}
 
+// --- CREATE REQUESTS (body payloads without id) ---
+export interface CourseCreateRequest { name: string; }
+export interface GroupCreateRequest { name: string; }
+export interface TopicCreateRequest { name: string; description?: string; courseId: number; }
+export interface TaskCreateRequest { name: string; description?: string; maxMark?: number; dueDate?: string; topicId: number; taskType?: string; }
+
+// --- SUBMISSIONS ---
+
+/** Універсальний інтерфейс для подання (об'єднує Test та File) */
 export interface Submission {
     id: string;
     taskId: number;
@@ -56,6 +153,23 @@ export interface Submission {
     submitted: string;
     status: SubmissionStatus;
     grade?: number;
+
     contentUrl?: string;
     content?: string;
 }
+
+export interface TestSubmitRequest {
+    content: string; // JSON-string з відповідями
+}
+
+export interface TestQuestion {
+    id: number;
+    taskId: number;
+    order: number;
+    text: string;
+    questionType: string; // SINGLE / MULTI
+    optionsJson?: string; // JSON string array/object
+    maxScore?: number;
+}
+export interface TestQuestionCreate { taskId: number; order: number; text: string; questionType: string; optionsJson?: string; maxScore?: number; }
+export interface TestQuestionUpdate { order?: number; text?: string; questionType?: string; optionsJson?: string; maxScore?: number; }

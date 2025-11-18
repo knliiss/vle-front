@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { studentApi, adminApi } from "../api/apiService";
+import { studentApi, adminApi, teacherApi } from "../api/apiService";
 import type { Course } from "../types";
 
-const Sidebar = () => {
+interface SidebarProps { open?: boolean; }
+
+const Sidebar = ({ open = false }: SidebarProps) => {
     const { user } = useAuth();
     const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
@@ -19,8 +21,9 @@ const Sidebar = () => {
             coursesPromise = studentApi.getMyCourses(user.id);
         } else if (user.role === "ADMINISTRATOR") {
             coursesPromise = adminApi.getCourses();
+        } else if (user.role === "TEACHER") {
+            coursesPromise = teacherApi.getMyCourses(user.id);
         } else {
-            // TODO: Потрібен 'teacherApi.getMyCourses()'
             coursesPromise = Promise.resolve({ data: [] });
         }
 
@@ -41,7 +44,7 @@ const Sidebar = () => {
     }
 
     return (
-        <aside className="sidebar">
+        <aside className={`sidebar ${open ? 'open' : ''}`}>
             <nav>
                 <ul>
                     <li>
