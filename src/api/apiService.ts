@@ -1,6 +1,4 @@
 import axios from "axios";
-// Передбачається, що типи імпортуються з вашого файлу types.ts
-// Якщо якихось типів не вистачає, замініть їх на 'any' або додайте в types.ts
 import type {
     User, UserExtended, UserCreateRequest, UserUpdateRequest,
     Course, CourseDto,
@@ -13,7 +11,6 @@ import type {
     TestQuestion, TestQuestionCreate, TestQuestionUpdate
 } from "../types";
 
-// --- НАЛАШТУВАННЯ AXIOS ---
 
 const apiClient = axios.create({
     baseURL: "http://localhost:8060/api/v1",
@@ -235,34 +232,54 @@ export const tasksApi = {
         try {
             const res = await apiClient.get(`/tasks/${taskId}/submissions`, { params: userId ? { userId } : {} });
             const raw = res.data;
-            if (debug) {
-                console.log('[SubmissionsDebug] Raw response', raw);
-            }
+            if (debug) console.log('[SubmissionsDebug] Raw response', raw);
+
+            // If backend returned already a flat array (legacy), assume it's Submission[]
             if (Array.isArray(raw)) {
-                // Legacy / unexpected array shape already unified
                 return raw as Submission[];
             }
+
+            // Canonical shape: { files: FileSubmissionDto[], tests: TestSubmissionDto[] }
             if (raw && typeof raw === 'object') {
                 const files = Array.isArray(raw.files) ? raw.files : [];
                 const tests = Array.isArray(raw.tests) ? raw.tests : [];
+
                 const unifiedFiles: Submission[] = files.map((f: any) => ({
-                    id: String(f.id), taskId: f.taskId, userId: f.userId, submitted: f.submitted,
-                    status: f.status, grade: f.grade, contentUrl: f.contentUrl, content: undefined
-                }));
+                    id: String(f.id),
+                    taskId: f.taskId,
+                    userId: f.userId,
+                    submitted: f.submitted,
+                    status: f.status,
+                    grade: f.grade ?? undefined,
+                    contentUrl: f.contentUrl,
+                    content: undefined,
+                    // additional metadata forwarded for the UI (not in Submission type but consumed as any)
+                    fileName: (f.fileName ?? null) as any,
+                    mimeType: (f.mimeType ?? null) as any,
+                    size: (f.size ?? null) as any,
+                } as any));
+
                 const unifiedTests: Submission[] = tests.map((t: any) => ({
-                    id: String(t.id), taskId: t.taskId, userId: t.userId, submitted: t.submitted,
-                    status: t.status, grade: t.grade, content: t.content, contentUrl: t.contentUrl
+                    id: String(t.id),
+                    taskId: t.taskId,
+                    userId: t.userId,
+                    submitted: t.submitted,
+                    status: t.status,
+                    grade: t.grade ?? undefined,
+                    content: t.content,
+                    contentUrl: t.contentUrl ?? undefined,
                 }));
-                const merged = [...unifiedFiles, ...unifiedTests].sort((a,b)=> new Date(a.submitted).getTime() - new Date(b.submitted).getTime());
-                if (debug) {
-                    console.log('[SubmissionsDebug] Normalized merged array', merged);
-                }
+
+                // Merge and sort by submitted descending (newest first)
+                const merged = [...unifiedFiles, ...unifiedTests].sort((a, b) => new Date(b.submitted).getTime() - new Date(a.submitted).getTime());
+                if (debug) console.log('[SubmissionsDebug] Normalized merged array', merged);
                 return merged;
             }
+
             return [];
         } catch (e) {
             if (debug) console.warn('[SubmissionsDebug] Error fetching submissions', e);
-            return [];
+            throw e;
         }
     },
 
@@ -398,20 +415,21 @@ export const adminApi = {
 
     // Delete entities
     deleteUser: (id: number) => usersApi.delete(id),
+    deleteCourse: (id: number) => coursesApi.delete(id),
+    deleteGroup: (id: number) => groupsApi.delete(id),
+    deleteTopic: (id: number) => topicsApi.delete(id),
 
     // Bind relations
     bindUserToGroup: (userId: number, groupId: number) => adminRelationsApi.bindUserToGroup(userId, groupId),
     bindTeacherToCourse: (teacherId: number, courseId: number) => adminRelationsApi.bindTeacherToCourse(teacherId, courseId),
     bindCourseToGroup: (courseId: number, groupId: number) => adminRelationsApi.bindCourseToGroup(courseId, groupId),
 
-    // Unbind (optional usage later)
     unbindUserFromGroup: (userId: number, groupId: number) => adminRelationsApi.unbindUserFromGroup(userId, groupId),
     unbindTeacherFromCourse: (teacherId: number, courseId: number) => adminRelationsApi.unbindTeacherFromCourse(teacherId, courseId),
     unbindCourseFromGroup: (courseId: number, groupId: number) => adminRelationsApi.unbindCourseFromGroup(courseId, groupId),
 };
 
 export const commonApi = {
-    // Topics & tasks retrieval
     getCourseTopics: (courseId: number) => coursesApi.getTopics(courseId),
     getTopicTasks: (topicId: number) => topicsApi.getTasks(topicId),
     getTaskById: (taskId: number) => tasksApi.getById(taskId),
@@ -429,15 +447,68 @@ export const studentApi = {
 };
 
 export const teacherApi = {
-    // Placeholder: until dedicated endpoint exists, reuse usersApi.getCourses
     getMyCourses: (userId: number) => usersApi.getCourses(userId),
     getMyProfile: () => profilesApi.getMyTeacherProfile(),
     getTaskSubmissions: (taskId: number) => tasksApi.getSubmissions(taskId),
-    /** Get submissions for specific user (required by backend for teacher/admin) */
-    getTaskSubmissionsForUser: (taskId: number, userId: number) => tasksApi.getSubmissions(taskId, userId),
-    /** Placeholder for future aggregated endpoint (requires backend support) */
+
+    getTaskSubmissionsForUser: async (taskId: number, userId: number): Promise<Submission[]> => {
+        const debug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debugSubs') === '1';
+        try {
+            const subs = await tasksApi.getSubmissions(taskId, userId);
+            return subs;
+        } catch (err: any) {
+            if (debug) console.warn('[SubmissionsDebug] /tasks/{id}/submissions failed, falling back to user-scoped endpoints', err?.response?.status);
+        }
+        try {
+            const [filesRes, testsRes] = await Promise.all([
+                submissionsApi.getUserFiles(userId),
+                submissionsApi.getUserTests(userId)
+            ]);
+            const files = Array.isArray(filesRes.data) ? filesRes.data : [];
+            const tests = Array.isArray(testsRes.data) ? testsRes.data : [];
+
+            const unifiedFiles: Submission[] = files
+                .filter((f: any) => f.taskId === taskId)
+                .map((f: any) => ({
+                    id: String(f.id),
+                    taskId: f.taskId,
+                    userId: f.userId,
+                    submitted: f.submitted,
+                    status: f.status,
+                    grade: f.grade ?? undefined,
+                    contentUrl: f.contentUrl,
+                    content: undefined,
+                    fileName: (f.fileName ?? null) as any,
+                    mimeType: (f.mimeType ?? null) as any,
+                    size: (f.size ?? null) as any,
+                } as any));
+
+            const unifiedTests: Submission[] = tests
+                .filter((t: any) => t.taskId === taskId)
+                .map((t: any) => ({
+                    id: String(t.id),
+                    taskId: t.taskId,
+                    userId: t.userId,
+                    submitted: t.submitted,
+                    status: t.status,
+                    grade: t.grade ?? undefined,
+                    content: t.content,
+                    contentUrl: t.contentUrl ?? undefined,
+                }));
+
+            const merged = [...unifiedFiles, ...unifiedTests].sort((a, b) => new Date(b.submitted).getTime() - new Date(a.submitted).getTime());
+            if (debug) console.log('[SubmissionsDebug] Fallback merged submissions', merged);
+            return merged;
+        } catch (e) {
+            if (debug) console.warn('[SubmissionsDebug] Fallback fetching user submissions failed', e);
+            throw e;
+        }
+    },
     getTaskSubmissionsAll: (taskId: number) => tasksApi.getSubmissions(taskId),
     getTestQuestions: (taskId: number) => testQuestionsApi.listByTask(taskId),
+
+    getRecentSubmissions: (teacherId: number, limit: number = 50) =>
+        apiClient.get<any[]>(`/teachers/${teacherId}/submissions/recent`, { params: { limit } }),
 };
 
 export const relationsApi = {

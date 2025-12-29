@@ -159,7 +159,7 @@ export interface Submission {
 }
 
 export interface TestSubmitRequest {
-    content: string; // JSON-string з відповідями
+    content: string;
 }
 
 export interface TestQuestion {
@@ -167,9 +167,23 @@ export interface TestQuestion {
     taskId: number;
     order: number;
     text: string;
-    questionType: string; // SINGLE / MULTI
-    optionsJson?: string; // JSON string array/object
+    questionType: string;
+    optionsJson?: string;
     maxScore?: number;
 }
 export interface TestQuestionCreate { taskId: number; order: number; text: string; questionType: string; optionsJson?: string; maxScore?: number; }
 export interface TestQuestionUpdate { order?: number; text?: string; questionType?: string; optionsJson?: string; maxScore?: number; }
+
+export interface CombinedSubmission {
+    id: string;
+    taskId: number;
+    userId: number;
+    submitted: string;
+    status: SubmissionStatus | string;
+    grade?: number | null;
+    fileName?: string | null;
+    contentUrl?: string | null;
+    mimeType?: string | null;
+    size?: number | null;
+    content?: any | null;
+}

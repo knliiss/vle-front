@@ -2,18 +2,57 @@ import { useEffect, useMemo, useState } from 'react';
 import { adminApi, coursesApi, relationsApi } from '../api/apiService';
 import type { Course, Topic, User, Group } from '../types';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const AdminCoursesPage = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [attachedGroups, setAttachedGroups] = useState<Group[]>([]);
+  const [attachedTeachers, setAttachedTeachers] = useState<User[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const { notify } = useToast();
 
-  // Нові стейти для привʼязаних
-  const [attachedGroups, setAttachedGroups] = useState<Group[]>([]);
-  const [attachedTeachers, setAttachedTeachers] = useState<User[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTitle, setConfirmTitle] = useState('Підтвердити видалення');
+  const [confirmMessage, setConfirmMessage] = useState('Ви впевнені?');
+  const [pendingDelete, setPendingDelete] = useState<{ kind: 'course'|'topic'; id: number } | null>(null);
+
+  const openDeleteConfirm = (kind: 'course'|'topic', id: number, name?: string) => {
+    setPendingDelete({ kind, id });
+    setConfirmTitle(kind === 'course' ? 'Видалити курс' : 'Видалити тему');
+    setConfirmMessage(kind === 'course'
+      ? `Видалити курс "${name ?? ''}"? Ця дія незворотна.`
+      : `Видалити тему "${name ?? ''}"? Всі пов'язані завдання також будуть видалені.`);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) { setConfirmOpen(false); return; }
+    const { kind, id } = pendingDelete;
+    try {
+      if (kind === 'course') {
+        await adminApi.deleteCourse(id);
+        notify('Курс видалено', 'success');
+        await load();
+        if (selectedCourseId === id) setSelectedCourseId(null);
+      } else {
+        await adminApi.deleteTopic(id);
+        notify('Тему видалено', 'success');
+        if (selectedCourseId) {
+          const res = await coursesApi.getTopics(selectedCourseId);
+          setTopics(res.data);
+        }
+      }
+    } catch (err) {
+      console.error('Delete failed', err);
+      notify('Не вдалося виконати видалення', 'error');
+    } finally {
+      setPendingDelete(null);
+      setConfirmOpen(false);
+    }
+  };
 
   const load = async () => {
     try {
@@ -69,6 +108,11 @@ const AdminCoursesPage = () => {
   const [teacherId, setTeacherId] = useState('');
   const [groupId, setGroupId] = useState('');
 
+
+  // Simple wrappers to open delete confirmation
+  const deleteCourse = (courseId: number, name?: string) => openDeleteConfirm('course', courseId, name);
+  const deleteTopic = (topicId: number, name?: string) => openDeleteConfirm('topic', topicId, name);
+
   // Фільтруємо вже привʼязаних
   const teacherOptions = users.filter(u => u.role === 'TEACHER' && !attachedTeachers.some(a => a.id === u.id));
   const groupOptions = groups.filter(g => !attachedGroups.some(a => a.id === g.id));
@@ -123,6 +167,7 @@ const AdminCoursesPage = () => {
 
   return (
     <div className="dashboard-container">
+      <ConfirmDialog open={confirmOpen} title={confirmTitle} message={confirmMessage} onConfirm={handleConfirmDelete} onCancel={() => { setConfirmOpen(false); setPendingDelete(null); }} />
       <header className="dashboard-header">
         <h1>Керування курсами</h1>
       </header>
@@ -131,10 +176,11 @@ const AdminCoursesPage = () => {
           <h3>Курси</h3>
           <ul>
             {courses.map(c => (
-              <li key={c.id}>
-                <button className="btn-secondary btn-small" onClick={() => setSelectedCourseId(c.id)} style={{width:'100%', justifyContent:'flex-start'}}>
+              <li key={c.id} style={{display:'flex', gap:8, alignItems:'center'}}>
+                <button className="btn-secondary btn-small" onClick={() => setSelectedCourseId(c.id)} style={{flex:1, justifyContent:'flex-start'}}>
                   {c.name}
                 </button>
+                <button className="btn-danger btn-small" onClick={() => deleteCourse(c.id, c.name)} style={{width:'auto'}}>Видалити</button>
               </li>
             ))}
           </ul>
@@ -185,7 +231,12 @@ const AdminCoursesPage = () => {
 
               <h4 className="mt-md">Теми курсу</h4>
               <ul>
-                {topics.map(t => <li key={t.id}>{t.name}</li>)}
+                {topics.map(t => (
+                  <li key={t.id} style={{display:'flex', alignItems:'center', gap:8}}>
+                    <span style={{flex:1}}>{t.name}</span>
+                    <button className="btn-danger btn-small" style={{width:'auto'}} onClick={() => deleteTopic(t.id, t.name)}>Видалити</button>
+                  </li>
+                ))}
                 {!topics.length && <li style={{color:'var(--text-muted)'}}>Немає тем.</li>}
               </ul>
             </div>

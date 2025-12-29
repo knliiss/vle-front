@@ -6,9 +6,11 @@ interface ConfirmDialogProps {
     onCancel: () => void;
     message?: string;
     title?: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
 }
 
-const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, onConfirm, onCancel, message = "Підтвердити дію?", title = "Підтвердження" }) => {
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, onConfirm, onCancel, message = "Підтвердити дію?", title = "Підтвердження", confirmLabel = 'Підтвердити', cancelLabel = 'Скасувати' }) => {
     if (!open) return null;
     return (
         <div className="modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
@@ -21,8 +23,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, onConfirm, onCancel
                     <p>{message}</p>
                 </div>
                 <div style={{ display:'flex', gap:8, justifyContent:'flex-end', padding:'0 1.5rem 1.25rem' }}>
-                    <button className="btn-secondary" onClick={onCancel}>Скасувати</button>
-                    <button className="btn-danger" onClick={onConfirm}>Підтвердити</button>
+                    <button className="btn-secondary" onClick={onCancel}>{cancelLabel}</button>
+                    <button className="btn-danger" onClick={onConfirm}>{confirmLabel}</button>
                 </div>
             </div>
         </div>

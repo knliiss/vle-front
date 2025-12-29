@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { testQuestionsApi } from '../api/apiService';
 import { useToast } from './ToastProvider';
+import ConfirmDialog from './ConfirmDialog';
 
 type QDto = {
   id?: number | null;
   taskId: number;
   order: number;
   text: string;
-  questionType: string; // 'SINGLE' | 'MULTI'
+  questionType: string;
   optionsJson?: string | null;
   maxScore?: number | null;
 };
@@ -107,14 +108,33 @@ const TestEditor: React.FC<Props> = ({ taskId, initial = [], onUpdated }) => {
   };
 
   // Delete
-  const handleDelete = async (id?: number | null) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [confirmTitle, setConfirmTitle] = useState('Підтвердити видалення');
+  const [confirmMessage, setConfirmMessage] = useState('Видалити питання?');
+
+  const handleDelete = (id?: number | null) => {
     if (!id) return;
-    if (!confirm('Видалити питання?')) return;
+    setPendingDeleteId(id);
+    setConfirmTitle('Видалити питання');
+    setConfirmMessage('Ви впевнені, що хочете видалити це питання?');
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    const id = pendingDeleteId;
+    if (!id) { setConfirmOpen(false); return; }
     try {
       await testQuestionsApi.delete(id);
       notify('Питання видалено', 'info');
       await reload();
-    } catch (err) { console.error(err); notify('Не вдалося видалити питання', 'error'); }
+    } catch (err) {
+      console.error(err);
+      notify('Не вдалося видалити питання', 'error');
+    } finally {
+      setPendingDeleteId(null);
+      setConfirmOpen(false);
+    }
   };
 
   // Move up / down
@@ -146,6 +166,8 @@ const TestEditor: React.FC<Props> = ({ taskId, initial = [], onUpdated }) => {
 
   return (
     <div className="card test-editor-card">
+      <ConfirmDialog open={confirmOpen} title={confirmTitle} message={confirmMessage} onConfirm={handleConfirmDelete} onCancel={() => { setConfirmOpen(false); setPendingDeleteId(null); }} />
+
       <div className="test-editor-header">
         <h3>Редактор тесту</h3>
         <p className="text-muted">Додайте питання, варіанти відповідей та бали. Порядок можна змінювати.</p>
@@ -200,16 +222,16 @@ const TestEditor: React.FC<Props> = ({ taskId, initial = [], onUpdated }) => {
                     <button className="btn-icon" title="Вниз" onClick={() => moveQuestion(idx, 'down')} disabled={idx === questions.length - 1}>▼</button>
                     <button className="btn-icon" title="Дублювати" onClick={() => duplicateQuestion(q)}>⧉</button>
                     {isEditing ? (
-                      <>
-                        <button className="btn-primary btn-small" onClick={() => handleSaveEdit()}>Зберегти</button>
-                        <button className="btn-secondary btn-small" onClick={() => cancelEdit()}>Скасувати</button>
-                      </>
-                    ) : (
-                      <>
-                        <button className="btn-secondary btn-small" onClick={() => startEdit(q)}>Редагувати</button>
-                        <button className="btn-danger btn-small" onClick={() => handleDelete(q.id)}>Видалити</button>
-                      </>
-                    )}
+                          <>
+                            <button className="btn-primary btn-small" onClick={() => handleSaveEdit()}>Зберегти</button>
+                            <button className="btn-secondary btn-small" onClick={() => cancelEdit()}>Скасувати</button>
+                          </>
+                        ) : (
+                          <>
+                            <button className="btn-secondary btn-small" onClick={() => startEdit(q)}>Редагувати</button>
+                            <button className="btn-danger btn-small" onClick={() => handleDelete(q.id)}>Видалити</button>
+                          </>
+                        )}
                   </div>
                 </div>
               </div>

@@ -5,6 +5,8 @@ import { useToast } from '../components/ToastProvider';
 import ConfirmDialog from '../components/ConfirmDialog';
 import BindUserToGroupModal from '../components/BindUserToGroupModal';
 import EditTeacherProfileModal from '../components/EditTeacherProfileModal';
+import CreateUserModal from '../components/CreateUserModal';
+import EditStudentProfileModal from '../components/EditStudentProfileModal';
 import { useAuth } from '../context/AuthContext';
 
 const rolesOrder: Array<User['role']> = ['ADMINISTRATOR','TEACHER','STUDENT'];
@@ -27,6 +29,10 @@ const AdminUsersPage = () => {
 
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [teacherToEdit, setTeacherToEdit] = useState<User | null>(null);
+
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [editStudentOpen, setEditStudentOpen] = useState(false);
+  const [studentToEdit, setStudentToEdit] = useState<User | null>(null);
 
   const [extendedTeachers, setExtendedTeachers] = useState<Record<number, any>>({});
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -65,6 +71,10 @@ const AdminUsersPage = () => {
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleUserCreated = () => { setShowCreateUserModal(false); load(); };
+
+  const openEditStudent = (u: User) => { setStudentToEdit(u); setEditStudentOpen(true); };
 
   const getGroupName = (user: User) => user.groupId ? (groups.find(g => g.id === user.groupId)?.name || '') : '';
   const getSortValue = (user: User, key: typeof sortKey) => {
@@ -208,16 +218,20 @@ const AdminUsersPage = () => {
         open={confirmOpen}
         onCancel={() => {setConfirmOpen(false); setUserToDelete(null);} }
         onConfirm={handleDelete}
-        title="Підтвердити видалення"
-        message={userToDelete ? `Видалити користувача ${userToDelete.username}?` : ''}
+        title={userToDelete ? `Видалити ${userToDelete.username}?` : 'Видалити користувача'}
+        message={userToDelete ? `Ця дія видалить обліковий запис користувача ${userToDelete.username}. Ви впевнені?` : 'Ви впевнені, що хочете видалити цього користувача?'}
+        confirmLabel="Видалити"
+        cancelLabel="Скасувати"
       />
 
       <ConfirmDialog
         open={bulkConfirmOpen}
         onCancel={() => setBulkConfirmOpen(false)}
         onConfirm={bulkDelete}
-        title="Підтвердити масове видалення"
+        title="Видалити вибраних користувачів"
         message={`Видалити вибраних користувачів (${selectedIds.size})? Ваш обліковий запис не буде видалено.`}
+        confirmLabel="Видалити"
+        cancelLabel="Відмінити"
       />
 
       <BindUserToGroupModal
@@ -232,8 +246,18 @@ const AdminUsersPage = () => {
         onClose={() => {setEditProfileOpen(false); setTeacherToEdit(null); load();}}
       />
 
+      <CreateUserModal show={showCreateUserModal} onClose={() => setShowCreateUserModal(false)} onUserCreated={handleUserCreated} />
+
+      <EditStudentProfileModal
+        show={editStudentOpen}
+        user={studentToEdit}
+        onClose={() => { setEditStudentOpen(false); setStudentToEdit(null); load(); }}
+        onSaved={() => load()}
+      />
+
       <div className="card" style={{marginBottom:'1.5rem'}}>
         <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
+          <button onClick={() => setShowCreateUserModal(true)} className="btn-primary">Створити користувача</button>
           {rolesOrder.map(role => (
             <button
               key={role}
@@ -399,6 +423,11 @@ const AdminUsersPage = () => {
                       {u.role === 'STUDENT' && (
                         <button className="btn-secondary btn-small" style={{width:'auto'}} onClick={() => openBindGroup(u)}>
                           Група
+                        </button>
+                      )}
+                      {u.role === 'STUDENT' && (
+                        <button className="btn-secondary btn-small" style={{width:'auto'}} onClick={() => openEditStudent(u)}>
+                          Редагувати профіль
                         </button>
                       )}
                       {u.role === 'TEACHER' && (

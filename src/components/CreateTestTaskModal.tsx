@@ -22,7 +22,6 @@ const CreateTestTaskModal: React.FC<Props> = ({ show, onClose, topicId, onTaskCr
     if (!name.trim()) { notify('Вкажіть назву тесту', 'warning'); return; }
     setLoading(true);
     try {
-      // Create a TEST task without questions; questions will be added on the task page
       await adminApi.createTask({ name, description: description || name, topicId, maxMark, taskType: 'TEST' });
       notify('Тест створено. Тепер додайте питання на сторінці завдання.', 'success');
       onTaskCreated();

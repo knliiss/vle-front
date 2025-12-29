@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { adminApi, relationsApi } from '../api/apiService';
 import type { Group, User, Course } from '../types';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const AdminGroupsPage = () => {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -11,6 +12,34 @@ const AdminGroupsPage = () => {
   const [sortKey, setSortKey] = useState<'username'|'fio'|'role'>('username');
   const [sortAsc, setSortAsc] = useState(true);
   const { notify } = useToast();
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTitle, setConfirmTitle] = useState('Підтвердити видалення');
+  const [confirmMessage, setConfirmMessage] = useState('Ви впевнені?');
+  const [pendingDelete, setPendingDelete] = useState<{ id: number } | null>(null);
+
+  const openDeleteConfirm = (groupId: number, name?: string) => {
+    setPendingDelete({ id: groupId });
+    setConfirmTitle('Видалити групу');
+    setConfirmMessage(`Видалити групу "${name ?? ''}"? Ця дія незворотна.`);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) { setConfirmOpen(false); return; }
+    try {
+      await adminApi.deleteGroup(pendingDelete.id);
+      notify('Групу видалено', 'success');
+      await load();
+      if (selectedGroupId === pendingDelete.id) setSelectedGroupId(null);
+    } catch (err) {
+      console.error('Failed to delete group', err);
+      notify('Не вдалося видалити групу', 'error');
+    } finally {
+      setPendingDelete(null);
+      setConfirmOpen(false);
+    }
+  };
 
   const [attachedCourses, setAttachedCourses] = useState<Course[]>([]);
 
@@ -41,6 +70,8 @@ const AdminGroupsPage = () => {
       notify('Не вдалося завантажити курси групи', 'error');
     }
   };
+
+  const deleteGroup = (groupId: number, name?: string) => openDeleteConfirm(groupId, name);
 
   useEffect(() => { load(); }, []);
   useEffect(() => { loadRelations(); }, [selectedGroupId]);
@@ -94,6 +125,7 @@ const AdminGroupsPage = () => {
 
   return (
     <div className="dashboard-container">
+      <ConfirmDialog open={confirmOpen} title={confirmTitle} message={confirmMessage} onConfirm={handleConfirmDelete} onCancel={() => { setConfirmOpen(false); setPendingDelete(null); }} />
       <header className="dashboard-header">
         <h1>Керування групами</h1>
       </header>
@@ -106,6 +138,7 @@ const AdminGroupsPage = () => {
                 <button className={`btn-secondary btn-small`} onClick={() => setSelectedGroupId(g.id)} style={{width:'100%', justifyContent:'flex-start'}}>
                   {g.name}
                 </button>
+                <button className="btn-danger btn-small" style={{marginLeft:8, width:'auto'}} onClick={() => deleteGroup(g.id, g.name)}>Видалити</button>
               </li>
             ))}
           </ul>

@@ -1,24 +1,20 @@
-/* =========================================
-   1. Змінні та Теми (Design Tokens)
-   ========================================= */
 :root {
-    /* --- Світла тема (Light Mode) --- */
-    --bg-body: #f4f4f5;             /* Zinc 100 - Світлий фон сторінки */
-    --bg-surface: #ffffff;          /* Чисто білі картки */
-    --bg-sidebar: rgba(255, 255, 255, 0.85); /* Напівпрозорий сайдбар */
+    --bg-body: #f4f4f5;
+    --bg-surface: #ffffff;
+    --bg-sidebar: rgba(255, 255, 255, 0.85);
 
-    --text-main: #18181b;           /* Zinc 950 - Основний текст */
-    --text-secondary: #71717a;      /* Zinc 500 - Додатковий текст */
-    --text-inverse: #ffffff;        /* Текст на кнопках */
+    --text-main: #18181b;
+    --text-secondary: #71717a;
+    --text-inverse: #ffffff;
 
-    --primary: #2563eb;             /* Яскравий синій (Royal Blue) */
-    --primary-hover: #1d4ed8;       /* Темніший синій */
-    --primary-light: rgba(37, 99, 235, 0.1); /* Фон для активних елементів */
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: rgba(37, 99, 235, 0.1);
 
-    --border: #e4e4e7;              /* Zinc 200 - Межі */
-    --border-focus: #2563eb;        /* Колір фокусу */
+    --border: #e4e4e7;
+    --border-focus: #2563eb;
 
-    --error: #ef4444;               /* Червоний */
+    --error: #ef4444;
     --error-bg: rgba(239, 68, 68, 0.1);
 
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -29,27 +25,25 @@
     --radius-md: 10px;
     --radius-lg: 16px;
 
-    --ease-spring: cubic-bezier(0.4, 0, 0.2, 1); /* Плавна анімація */
+    --ease-spring: cubic-bezier(0.4, 0, 0.2, 1);
 
     --choice-size: 20px;
 }
 
-/* --- Темна тема (Dark Mode - Monochrome) --- */
 [data-theme='dark'] {
-    --bg-body: #09090b;             /* Zinc 950 - Глибокий чорний */
-    --bg-surface: #18181b;          /* Zinc 900 - Темно-сірий для карток */
-    --bg-sidebar: rgba(24, 24, 27, 0.8); /* Напівпрозорий темний */
+    --bg-body: #09090b;
+    --bg-surface: #18181b;
+    --bg-sidebar: rgba(24, 24, 27, 0.8);
 
-    --text-main: #fafafa;           /* Zinc 50 - Майже білий */
-    --text-secondary: #a1a1aa;      /* Zinc 400 - Світло-сірий */
-    --text-inverse: #09090b;        /* Чорний текст (для білих кнопок) */
+    --text-main: #fafafa;
+    --text-secondary: #a1a1aa;
+    --text-inverse: #09090b;
 
-    /* У темній темі акцент не синій, а білий/сталевий для строгого стилю */
-    --primary: #e4e4e7;             /* Zinc 200 */
-    --primary-hover: #ffffff;       /* Чисто білий */
+    --primary: #e4e4e7;
+    --primary-hover: #ffffff;
     --primary-light: rgba(255, 255, 255, 0.1);
 
-    --border: #27272a;              /* Zinc 800 - Темні межі */
+    --border: #27272a;
     --border-focus: #e4e4e7;
 
     --error: #f87171;
@@ -62,9 +56,6 @@
     --choice-size: 20px;
 }
 
-/* =========================================
-   2. Глобальні налаштування
-   ========================================= */
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -91,7 +82,6 @@ a:hover {
     text-decoration: none;
 }
 
-/* Скролбар */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -107,9 +97,6 @@ a:hover {
     background: var(--text-secondary);
 }
 
-/* =========================================
-   3. Лейаут (Layout Structure)
-   ========================================= */
 .app-layout {
     display: flex;
     flex-direction: column;
@@ -120,7 +107,7 @@ a:hover {
 .app-body {
     display: flex;
     flex: 1;
-    overflow: hidden; /* Щоб скролився тільки контент */
+    overflow: hidden;
 }
 
 .main-content {
@@ -136,9 +123,6 @@ a:hover {
     animation: fade-in 0.4s var(--ease-spring);
 }
 
-/* =========================================
-   4. Хедер та Сайдбар
-   ========================================= */
 .app-header {
     height: 64px;
     display: flex;
@@ -214,12 +198,9 @@ a:hover {
 
 .sidebar nav li a.active {
     background-color: var(--primary-light);
-    color: var(--primary); /* В темній темі це буде білий */
+    color: var(--primary);
 }
 
-/* =========================================
-   5. Картки (Cards)
-   ========================================= */
 .card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border);
@@ -233,7 +214,7 @@ a:hover {
 .card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    border-color: var(--text-secondary); /* Легкий акцент при наведенні */
+    border-color: var(--text-secondary);
 }
 
 .card h3 {
@@ -252,7 +233,6 @@ a:hover {
     gap: 1.5rem;
 }
 
-/* Списки всередині карток */
 .card ul {
     padding-left: 0;
     list-style: none;
@@ -276,15 +256,11 @@ a:hover {
     color: var(--text-main);
 }
 
-/* =========================================
-   6. Кнопки (Buttons)
-   ========================================= */
 button {
     cursor: pointer;
     font-family: inherit;
 }
 
-/* Базовий стиль кнопки */
 .btn-primary, .btn-secondary, .btn-danger {
     display: inline-flex;
     align-items: center;
@@ -298,10 +274,9 @@ button {
     line-height: 1.2;
 }
 
-/* Основна кнопка */
 .btn-primary {
     background-color: var(--primary);
-    color: var(--text-inverse); /* Чорний текст в темній темі */
+    color: var(--text-inverse);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -311,7 +286,6 @@ button {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Вторинна кнопка (Outline) */
 .btn-secondary {
     background-color: transparent;
     color: var(--text-main);
@@ -323,7 +297,6 @@ button {
     border-color: var(--text-secondary);
 }
 
-/* Небезпечна кнопка */
 .btn-danger {
     background-color: transparent;
     color: var(--error);
@@ -347,9 +320,6 @@ button {
     flex-wrap: wrap;
 }
 
-/* =========================================
-   7. Форми (Forms & Inputs)
-   ========================================= */
 .form-group {
     margin-bottom: 1.25rem;
 }
@@ -373,14 +343,13 @@ textarea {
     padding: 0.6rem 0.75rem;
     font-size: 0.9rem;
     color: var(--text-main);
-    background-color: var(--bg-surface); /* was var(--bg-body) for light theme, now pure surface for better contrast */
+    background-color: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     transition: border-color 0.2s, box-shadow 0.2s;
     font-family: inherit;
 }
 
-/* Dark theme input overrides for stronger contrast */
 [data-theme='dark'] input[type="text"],
 [data-theme='dark'] input[type="password"],
 [data-theme='dark'] input[type="number"],
@@ -392,7 +361,7 @@ textarea {
 [data-theme='dark'] .input-inline,
 [data-theme='dark'] .option-row input,
 [data-theme='dark'] .input-score {
-    background-color: #1e1e21; /* slightly lighter than body for visual separation */
+    background-color: #1e1e21;
     color: #fafafa;
     border-color: #2e2e33;
 }
@@ -403,22 +372,103 @@ textarea {
     color: #d4d4d8;
 }
 
-/* Placeholder colors */
 input::placeholder, textarea::placeholder { color: #9ca3af; }
 [data-theme='dark'] input::placeholder, [data-theme='dark'] textarea::placeholder { color: #6b6b70; }
 
-/* Focus adjustments for dark theme */
 [data-theme='dark'] input:focus, [data-theme='dark'] select:focus, [data-theme='dark'] textarea:focus, [data-theme='dark'] .input-large:focus, [data-theme='dark'] .input-inline:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
 }
 
-/* Light theme specific option handle subtle tweak */
 .option-handle, .option-left { background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0)); }
 
-/* =========================================
-   8. Модальні вікна (Modals)
-   ========================================= */
+.form-control-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  display: inline-block;
+  width: 100%;
+  padding: 0.6rem 2.4rem 0.6rem 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-sm) - 2px);
+  background-image: linear-gradient(transparent, transparent),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'><path d='M6 7l4 4 4-4' stroke='%232567EB' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat, no-repeat;
+  background-position: right 10px center, right 10px center;
+  background-size: 1rem auto, 1rem auto;
+  transition: border-color 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-spring), transform 0.12s;
+}
+
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+.select-wrapper .select-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.form-control-select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 6px var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.form-control-select:hover {
+  border-color: var(--text-secondary);
+}
+
+.form-control-select.small {
+  padding: 0.25rem 1.8rem 0.25rem 0.5rem;
+  font-size: 0.82rem;
+}
+
+.form-control-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-body);
+}
+
+.form-control-select[multiple] {
+  height: auto;
+  min-height: 6rem;
+  padding: 0.5rem;
+  background-image: none;
+}
+
+.form-control-select::-ms-expand { display: none; }
+
+[data-theme='dark'] .form-control-select {
+  background-color: #1e1e21;
+  color: var(--text-main);
+  border-color: #2e2e33;
+  background-image: linear-gradient(transparent, transparent), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'><path d='M6 7l4 4 4-4' stroke='%23E4E4E7' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+[data-theme='dark'] .form-control-select:focus {
+  box-shadow: 0 0 0 6px rgba(228,228,231,0.06);
+}
+
+.card .form-control-select {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+}
+[data-theme='dark'] .card .form-control-select {
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+}
+
+@media (max-width: 600px) {
+  .form-control-select { padding: 0.75rem 2.6rem 0.75rem 0.85rem; }
+}
+
 .modal-backdrop {
     position: fixed;
     top: 0;
@@ -485,9 +535,6 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
     padding: 0.75rem;
 }
 
-/* =========================================
-   9. Сторінка Логіну
-   ========================================= */
 .auth-container {
     display: flex;
     justify-content: center;
@@ -524,9 +571,6 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
     border-radius: var(--radius-sm);
 }
 
-/* =========================================
-   10. Анімації
-   ========================================= */
 @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -543,9 +587,6 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
   100% { box-shadow: 0 0 0 0 var(--primary-light); }
 }
 
-/* =========================================
-   11. Адаптивність
-   ========================================= */
 @media (max-width: 768px) {
     .app-body {
         flex-direction: column;
@@ -664,38 +705,30 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 .test-option input[type="checkbox"] + span::before { content: ""; position: absolute; left: -30px; top: 50%; transform: translateY(-50%); width: var(--choice-size); height: var(--choice-size); border: 2px solid var(--border); background: var(--bg-body); border-radius: 6px; box-sizing: border-box; transition: border-color .25s, background-color .25s, box-shadow .25s; }
 .test-option input[type="radio"] + span::before { border-radius: 50%; }
 
-/* Checked state */
 .test-option input:checked + span::before { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
 .test-option input[type="radio"]:checked + span::before { box-shadow: 0 0 0 4px var(--primary-light), inset 0 0 0 4px var(--bg-surface); }
 
-/* Hover (only when not disabled) */
 .test-option input:not(:disabled) + span:hover::before { border-color: var(--primary); }
 .test-option input:not(:disabled) + span:hover { color: var(--text-main); }
 
-/* Focus visible */
 .test-option input:focus-visible + span::before { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* Disabled */
 .test-option input:disabled + span { color: var(--text-secondary); cursor: not-allowed; opacity: .7; }
 .test-option input:disabled + span::before { border-color: var(--border); background: var(--bg-body); box-shadow: none; }
 .test-option input:disabled:checked + span::before { background: var(--primary-light); border-color: var(--border); }
 
-/* Dark theme adjustments */
 [data-theme='dark'] .test-option input[type="radio"] + span::before,
 [data-theme='dark'] .test-option input[type="checkbox"] + span::before { background: #121214; border-color: #2e2e33; }
 [data-theme='dark'] .test-option input:checked + span::before { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px rgba(255,255,255,0.12); }
 [data-theme='dark'] .test-option input[type="radio"]:checked + span::before { box-shadow: 0 0 0 4px rgba(255,255,255,0.12), inset 0 0 0 4px var(--bg-surface); }
 [data-theme='dark'] .test-option input:disabled:checked + span::before { background: rgba(255,255,255,0.15); border-color: #2e2e33; }
 
-/* Reduce motion respect */
+
 @media (prefers-reduced-motion: reduce) {
   .test-option input:checked + span::before,
   .test-option input[type="radio"]:checked + span::before { animation: none !important; }
 }
 
-/* =========================================
-   12. Додаткові стилі для тестів
-   ========================================= */
 .test-editor-card { padding: 1rem; }
 .test-editor-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:0.75rem; }
 .test-editor-header h3 { margin:0; font-size:1.05rem; }
@@ -734,7 +767,6 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 
 .btn-primary.btn-small, .btn-secondary.btn-small, .btn-danger.btn-small { padding:6px 8px; }
 
-/* subtle animations */
 .question-card { transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-spring); }
 .question-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 

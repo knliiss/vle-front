@@ -40,14 +40,13 @@ const Layout = () => {
                     }
                 });
             }
-            if (sweeps < 8) setTimeout(sweep, 750); // run ~8 times over ~6s
+            if (sweeps < 8) setTimeout(sweep, 750);
         };
-        setTimeout(sweep, 100); // initial delay
+        setTimeout(sweep, 100);
     }, [location.pathname, user?.role]);
 
     useEffect(() => {
         const onResize = () => {
-            // Ensure overlay is closed when switching breakpoints
             if (window.innerWidth >= 901 && sidebarOpen) setSidebarOpen(false);
         };
         window.addEventListener('resize', onResize);

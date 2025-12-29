@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { Link, useParams, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/ToastProvider";
 import { commonApi, studentApi, teacherApi, testQuestionsApi, submissionsApi, relationsApi } from "../api/apiService";
+import apiClient from "../api/apiService";
 import type { Task, Submission, TestQuestion, User, Group } from "../types";
 import TestRunner from "../components/TestRunner";
 import TestEditor from "../components/TestEditor";
@@ -75,12 +76,18 @@ const TaskPage: React.FC = () => {
     finally { setLoading(false); }
   };
 
+  // Track last-loaded course for students to prevent duplicate requests
+  const studentsLoadTokenRef = useRef<number | null>(null);
+
   // Load students when courseId becomes available
   useEffect(() => {
     const loadStudents = async () => {
       if (!(user && (user.role === 'TEACHER' || user.role === 'ADMINISTRATOR'))) return;
       if (!courseId) return;
+      // Avoid duplicate loads for the same course (handles React.StrictMode double mount)
       if (studentsForSelect.length > 0 || studentsLoading) return;
+      if (studentsLoadTokenRef.current === courseId) return;
+      studentsLoadTokenRef.current = courseId;
       setStudentsLoading(true);
       setStudentsError("");
       if (debugSubsEnabled) console.log('[SubmissionsDebug] Loading students for course', courseId);
@@ -92,7 +99,10 @@ const TaskPage: React.FC = () => {
         for (const g of groups) {
           try {
             const usersRes = await relationsApi.getGroupUsers(g.id);
-            const stu = (Array.isArray(usersRes.data) ? usersRes.data : []).filter(u => u.role === 'STUDENT');
+            // Some backend endpoints may return users without a 'role' field.
+            // Treat users with missing role as students (keep them). If role exists, require STUDENT.
+            const rawUsers = Array.isArray(usersRes.data) ? usersRes.data : [];
+            const stu = rawUsers.filter((u:any) => (u.role ? u.role === 'STUDENT' : true));
             stu.forEach(s => { if (!aggregated.some(x => x.id === s.id)) aggregated.push(s); });
           } catch (inner) {
             if (debugSubsEnabled) console.warn('[SubmissionsDebug] Failed group users', g.id, inner);
@@ -106,13 +116,39 @@ const TaskPage: React.FC = () => {
       } finally { setStudentsLoading(false); }
     };
     loadStudents();
-  }, [courseId, user?.role, studentsForSelect.length, studentsLoading, debugSubsEnabled]);
+  }, [courseId, user?.role, debugSubsEnabled]);
+  // Reset token when courseId becomes null or changes to avoid stale token
+  useEffect(() => {
+    if (!courseId) studentsLoadTokenRef.current = null;
+  }, [courseId]);
 
   useEffect(() => { fetchAll(); }, [numericTaskId, user?.role]);
+
+  // If opened from teacher dashboard with ?student={id} or ?userId={id}, preselect that student
+  const location = useLocation();
+  useEffect(() => {
+    if (!(user && (user.role === 'TEACHER' || user.role === 'ADMINISTRATOR'))) return;
+    const params = new URLSearchParams(location.search || window.location.search);
+    const candidate = params.get('student') || params.get('userId');
+    if (!candidate) return;
+    const id = Number(candidate);
+    if (!isNaN(id) && id > 0) {
+      setSelectedUserId(id);
+    }
+  }, [location.search, user?.role, numericTaskId]);
+
+  // Prevent duplicate fetches for same task+user
+  const submissionsFetchTokenRef = useRef<string | null>(null);
   useEffect(() => {
     const run = async () => {
       if (!(user && (user.role === 'TEACHER' || user.role === 'ADMINISTRATOR'))) return;
       if (!selectedUserId) return;
+      const token = `${numericTaskId || 'noTask'}_${selectedUserId}`;
+      if (submissionsFetchTokenRef.current === token) {
+        if (debugSubsEnabled) console.log('[SubmissionsDebug] Skipping duplicate fetch for', token);
+        return;
+      }
+      submissionsFetchTokenRef.current = token;
       if (debugSubsEnabled) {
         console.log('[SubmissionsDebug] Fetching submissions for task', numericTaskId, 'user', selectedUserId);
       }
@@ -130,9 +166,13 @@ const TaskPage: React.FC = () => {
         if (e?.response?.status === 400) setSubmissionsHint('Перевір userId — сервер повернув 400');
         else if (e?.response?.status === 403) setSubmissionsHint('Немає прав для перегляду робіт цього студента');
         else setSubmissionsHint('Не вдалося завантажити роботи');
+        // clear token on error so retry is possible
+        submissionsFetchTokenRef.current = null;
       }
     };
     run();
+    // reset token when selected user changes to allow new fetches
+    return () => { /* noop cleanup */ };
   }, [selectedUserId, user?.role, numericTaskId, debugSubsEnabled]);
 
   const [file, setFile] = useState<File | null>(null);
@@ -206,6 +246,33 @@ const TaskPage: React.FC = () => {
       console.log('[SubmissionsDebug] Parsed answers', parsedAnswers);
     }
   }, [parsedAnswers, answersModal, debugSubsEnabled]);
+
+  const handleDownload = async (submissionId: string, fileName?: string | null) => {
+    try {
+      const res = await submissionsApi.downloadFile(submissionId);
+      const blob = res.data;
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName || 'submission';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      return;
+    } catch (err) {
+      console.warn('[SubmissionsDownload] blob download failed, falling back to navigation', err);
+    }
+    // Fallback: open backend download URL in a new tab so the browser follows redirects (302 -> external storage).
+    try {
+      const base = apiClient.defaults.baseURL || '';
+      const url = `${base}/submissions-ext/file/${submissionId}/download`;
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('Fallback download failed', err);
+      alert('Не вдалося завантажити файл');
+    }
+  };
 
   if (loading) return <div className="dashboard-container"><p>Завантаження...</p></div>;
   if (error) return <div className="dashboard-container"><p className="error-message">{error}</p></div>;
@@ -350,16 +417,19 @@ const TaskPage: React.FC = () => {
                 {allSubs.map(sub => {
                   const isTestSubmission = !!sub.content && !sub.contentUrl;
                   const typeLabel = isTestSubmission ? 'TEST' : (sub.contentUrl ? 'FILE' : '—');
+                  const fileName = (sub as any).fileName || null;
+                  const mimeType = (sub as any).mimeType || null;
                   return (
                     <li key={sub.id} style={{borderBottom:'1px solid var(--border)', padding:'0.75rem 0'}}>
                       <div style={{display:'flex', gap:12, flexWrap:'wrap', justifyContent:'space-between'}}>
-                        <span><strong>User #{sub.userId}</strong> – {new Date(sub.submitted).toLocaleString('uk-UA')}</span>
+                        <span style={{minWidth:240}}><strong>User #{sub.userId}</strong> – {new Date(sub.submitted).toLocaleString('uk-UA')} {fileName ? `• ${fileName}` : ''}</span>
                         <span>Тип: <span style={{fontWeight:600}}>{typeLabel}</span></span>
                         <span>Статус: {sub.status}</span>
                         <span>Оцінка: {sub.grade ?? '—'}</span>
                       </div>
                       <div style={{display:'flex', gap:8, alignItems:'center', marginTop:8, flexWrap:'wrap'}}>
                         {isTestSubmission && <button className="btn-secondary btn-small" onClick={()=>openAnswers(sub)}>Відповіді</button>}
+                        {sub.contentUrl && <button className="btn-secondary btn-small" onClick={() => handleDownload(sub.id, fileName)}>Завантажити</button>}
                         <button className="btn-secondary btn-small" onClick={() => { setGradingId(sub.id); setGradeValue(sub.grade || 0); }}>Оцінити</button>
                         {gradingId === sub.id && (
                           <form onSubmit={submitGrade} style={{display:'flex', gap:8, alignItems:'center'}}>
@@ -369,6 +439,12 @@ const TaskPage: React.FC = () => {
                           </form>
                         )}
                       </div>
+                      {/* Preview for images */}
+                      {sub.contentUrl && mimeType && mimeType.startsWith && (mimeType as string).startsWith('image/') && (
+                        <div style={{marginTop:8}}>
+                          <img src={sub.contentUrl} alt={fileName || 'preview'} style={{maxWidth:240, maxHeight:160, borderRadius:6, border:'1px solid var(--border)'}} />
+                        </div>
+                      )}
                     </li>
                   );
                 })}
@@ -385,6 +461,11 @@ const TaskPage: React.FC = () => {
                 {safeMySubs.map((s, idx) => (
                   <li key={s.id + '_' + idx}>
                     {new Date(s.submitted).toLocaleString('uk-UA')} – <strong>{s.status}</strong> – Оцінка: {s.grade ?? 'Немає'}
+                    {(s as any).fileName && <span> • { (s as any).fileName }</span>}
+                    {s.contentUrl && <button className="btn-secondary btn-small" style={{marginLeft:8}} onClick={()=>handleDownload(s.id, (s as any).fileName)}>Завантажити</button>}
+                    {s.contentUrl && (s as any).mimeType && (s as any).mimeType.startsWith && (s as any).mimeType.startsWith('image/') && (
+                      <div style={{marginTop:6}}><img src={s.contentUrl} alt={(s as any).fileName || 'preview'} style={{maxWidth:200, maxHeight:140}} /></div>
+                    )}
                   </li>
                 ))}
               </ul>
